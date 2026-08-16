@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $payments = Payment::with('patient')
+        $payments = Payment::with(['patient', 'caregiver'])
             ->when($request->patient_id, function ($query) use ($request) {
                 $query->where('patient_id', $request->patient_id);
             })

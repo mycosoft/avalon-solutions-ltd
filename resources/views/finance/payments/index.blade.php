@@ -81,8 +81,21 @@
                                     <tr>
                                         <td>{{ $pmt->id }}</td>
                                         <td>{{ $pmt->payment_date->format('Y-m-d') }}</td>
-                                        <td>{{ $pmt->patient->name }}</td>
-                                        <td>{{ $pmt->payee_name }}</td>
+                                        <td>
+                                            @if($pmt->patient)
+                                                <a href="{{ route('patients.show', $pmt->patient->id) }}">{{ $pmt->patient->name }}</a>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ $pmt->payee_name }}
+                                            @if($pmt->payee_for === 'caregiver')
+                                                <span class="badge badge-info ml-1">Caregiver</span>
+                                            @else
+                                                <span class="badge badge-secondary ml-1">Patient</span>
+                                            @endif
+                                        </td>
                                         <td>{{ number_format($pmt->amount_paid, 2) }}</td>
                                         <td>{{ $pmt->days_paid }}</td>
                                         <td>{{ ucfirst($pmt->payment_method) }}</td>
