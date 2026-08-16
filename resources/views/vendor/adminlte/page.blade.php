@@ -196,6 +196,41 @@
         }
 
         /* =========================================================
+           Button overrides - align .btn-info to Avalon brand color
+           ========================================================= */
+        .btn-info {
+            background-color: #19647E !important;
+            border-color: #19647E !important;
+            color: #ffffff !important;
+        }
+        .btn-info:hover,
+        .btn-info:focus,
+        .btn-info:active {
+            background-color: #154f63 !important;
+            border-color: #154f63 !important;
+            color: #ffffff !important;
+        }
+        .btn-info:not(:disabled):not(.disabled):active,
+        .btn-info:not(:disabled):not(.disabled).active {
+            background-color: #154f63 !important;
+            border-color: #154f63 !important;
+        }
+
+        /* Avalon white button - white background, black text (e.g. Caregiver Payments link) */
+        .btn-avalon-white {
+            background-color: #ffffff !important;
+            border: 1px solid #d0d5dd !important;
+            color: #1f2937 !important;
+        }
+        .btn-avalon-white:hover,
+        .btn-avalon-white:focus,
+        .btn-avalon-white:active {
+            background-color: #f1f5f9 !important;
+            border-color: #b8c0cc !important;
+            color: #000000 !important;
+        }
+
+        /* =========================================================
            Top Navbar - custom brand color #19647E
            ========================================================= */
         :root {

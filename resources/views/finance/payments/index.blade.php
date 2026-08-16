@@ -26,7 +26,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Patient Payment Records</h3>
                         <div class="card-tools">
-                            <a href="{{ route('caregiver-payments.index') }}" class="btn btn-default btn-sm mr-2">
+                            <a href="{{ route('caregiver-payments.index') }}" class="btn btn-sm mr-2 btn-avalon-white">
                                 <i class="fas fa-user-nurse"></i> Caregiver Payments
                             </a>
                             <a href="{{ route('payments.create') }}" class="btn btn-success btn-sm">
