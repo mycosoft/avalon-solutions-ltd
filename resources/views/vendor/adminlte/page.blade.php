@@ -25,7 +25,7 @@
         /* Main sidebar shell ------------------------------------------------- */
         .main-sidebar,
         .main-sidebar .sidebar {
-            background: linear-gradient(180deg, #19647E 0%, #134858 100%) !important;
+            background-color: #19647E !important;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
             border-right: 1px solid var(--sidebar-border);
         }

@@ -6,7 +6,7 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Welcome Back, {{ auth()->user()->name }}!</h1>
+                <h1 class="m-0 welcome-heading">Welcome Back, {{ auth()->user()->name }}!</h1>
             </div>
             <div class="col-sm-6">
                 <div class="float-sm-right">
@@ -71,6 +71,13 @@
         font-size: 12px;
         display: block;
         margin-top: 2px;
+    }
+
+    /* Dashboard greeting - slightly smaller than the AdminLTE default */
+    .content-header .welcome-heading {
+        font-size: 1.15rem !important;
+        font-weight: 600;
+        letter-spacing: -0.2px;
     }
 </style>
 @endpush
