@@ -173,9 +173,9 @@
         {{-- Row 3: Charts --}}
         <div class="row">
             <div class="col-lg-8 col-12">
-                <div class="card card-primary card-outline shadow-sm">
+                <div class="card card-info card-outline shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>6-Month Payments & Expenses Trend</h3>
+                        <h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Payments Vs Expenses</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                             <button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
@@ -209,10 +209,10 @@
         <div class="row">
             <div class="col-lg-6 col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white border-bottom">
-                        <h3 class="card-title"><i class="fas fa-money-bill text-primary mr-2"></i>Recent Payments</h3>
+                    <div class="card-header bg-info">
+                        <h3 class="card-title text-white"><i class="fas fa-money-bill text-white mr-2"></i>Recent Payments</h3>
                         <div class="card-tools">
-                            <a href="{{ route('payments.index') }}" class="btn btn-sm btn-outline-info">View All</a>
+                            <a href="{{ route('payments.index') }}" class="btn btn-sm btn-light">View All</a>
                         </div>
                     </div>
                     <div class="card-body p-0 table-responsive">
@@ -373,9 +373,9 @@
         {{-- Charts Row --}}
         <div class="row">
             <div class="col-lg-8 col-12">
-                <div class="card card-primary card-outline shadow-sm">
+                <div class="card card-info card-outline shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>6-Month Payments & Expenses Trend</h3>
+                        <h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Payments Vs Expenses</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                             <button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand"></i></button>
@@ -409,10 +409,10 @@
         <div class="row">
             <div class="col-lg-6 col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white border-bottom">
-                        <h3 class="card-title"><i class="fas fa-money-bill text-primary mr-2"></i>Recent Payments</h3>
+                    <div class="card-header bg-info">
+                        <h3 class="card-title text-white"><i class="fas fa-money-bill text-white mr-2"></i>Recent Payments</h3>
                         <div class="card-tools">
-                            <a href="{{ route('payments.index') }}" class="btn btn-sm btn-outline-info">View All</a>
+                            <a href="{{ route('payments.index') }}" class="btn btn-sm btn-light">View All</a>
                         </div>
                     </div>
                     <div class="card-body p-0 table-responsive">
