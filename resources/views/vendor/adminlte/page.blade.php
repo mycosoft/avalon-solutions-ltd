@@ -230,57 +230,7 @@
             color: #000000 !important;
         }
 
-        /* =========================================================
-           Top Navbar - custom brand color #19647E
-           ========================================================= */
-        :root {
-            --navbar-brand: #19647E;
-            --navbar-brand-hover: #154f63;
-            --navbar-brand-active: #1c7090;
-        }
-
-        .main-header.navbar {
-            background-color: var(--navbar-brand) !important;
-            border-bottom: 1px solid var(--navbar-brand-hover) !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-            transition: background-color 0.2s ease;
-        }
-
-        .main-header.navbar:hover {
-            background-color: var(--navbar-brand-hover) !important;
-        }
-
-        /* Navbar links / dropdowns / user menu - keep readable on the dark teal */
-        .main-header.navbar .nav-link,
-        .main-header.navbar .navbar-nav .nav-link,
-        .main-header.navbar .navbar-nav .nav-link .nav-icon {
-            color: rgba(255, 255, 255, 0.95) !important;
-        }
-        .main-header.navbar .nav-link:hover,
-        .main-header.navbar .navbar-nav .nav-link:hover {
-            color: #ffffff !important;
-            background-color: var(--navbar-brand-hover) !important;
-        }
-        .main-header.navbar .nav-link.active,
-        .main-header.navbar .navbar-nav .nav-link.active {
-            background-color: var(--navbar-brand-active) !important;
-            color: #ffffff !important;
-        }
-
-        /* Sidebar toggle (hamburger) icon - keep visible */
-        .main-header.navbar .sidebar-toggle {
-            color: #ffffff !important;
-        }
-        .main-header.navbar .sidebar-toggle:hover {
-            background-color: var(--navbar-brand-hover) !important;
-        }
-
-        /* Notification bell badge stays readable */
-        .main-header.navbar .navbar-badge {
-            background-color: #ffc107 !important;
-            color: #1f2937 !important;
-        }
-    </style>
+        </style>
 @stop
 
 @section('classes_body', $layoutHelper->makeBodyClasses())
