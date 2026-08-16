@@ -46,12 +46,20 @@
                                         <select class="form-control @error('patient_id') is-invalid @enderror" id="patient_id" name="patient_id" required>
                                             <option value="">Select Patient</option>
                                             @foreach($patients as $pt)
-                                                <option value="{{ $pt->id }}" data-ward="{{ $pt->ward }}" data-caregivers="{{ $pt->caregivers->pluck('id')->implode(',') }}" {{ old('patient_id') == $pt->id ? 'selected' : '' }}>
+                                                @php
+                                                    $daysAdmitted = $pt->date_of_admission ? (int) $pt->days_admitted : 0;
+                                                @endphp
+                                                <option value="{{ $pt->id }}"
+                                                        data-ward="{{ $pt->ward }}"
+                                                        data-caregivers="{{ $pt->caregivers->pluck('id')->implode(',') }}"
+                                                        data-days-admission="{{ $pt->date_of_admission ? $pt->date_of_admission->format('Y-m-d') : '' }}"
+                                                        {{ old('patient_id') == $pt->id ? 'selected' : '' }}>
                                                     {{ $pt->name }} &mdash; {{ $pt->ward ?? 'No Ward' }}
+                                                    ({{ $daysAdmitted }} day{{ $daysAdmitted == 1 ? '' : 's' }} on ward)
                                                     @if($pt->caregivers->isNotEmpty())
-                                                        ({{ $pt->caregivers->pluck('name')->implode(', ') }})
+                                                        &middot; ({{ $pt->caregivers->pluck('name')->implode(', ') }})
                                                     @else
-                                                        (Unassigned)
+                                                        &middot; (Unassigned)
                                                     @endif
                                                 </option>
                                             @endforeach
@@ -139,7 +147,37 @@
         var patientSelect = document.getElementById('patient_id');
         var caregiverSelect = document.getElementById('caregiver_id');
         var wardInput = document.getElementById('ward');
+        var daysInput = document.getElementById('days_under_care');
+        var dateInput = document.getElementById('date');
         var caregiverHint = document.getElementById('caregiver-hint');
+
+        /**
+         * Compute days under care from the attendance date input (falling back
+         * to today if blank). Each patient option carries its admission date
+         * via data-days-admission (YYYY-MM-DD) so we can diff against the
+         * attendance date even for back-filled records.
+         */
+        function computeDaysUnderCare(opt) {
+            var admission = opt.getAttribute('data-days-admission');
+            if (!admission) {
+                return null;
+            }
+            var attendanceDate = dateInput && dateInput.value
+                ? new Date(dateInput.value)
+                : new Date();
+            var admissionDate = new Date(admission);
+            if (isNaN(attendanceDate.getTime()) || isNaN(admissionDate.getTime())) {
+                return null;
+            }
+            if (attendanceDate < admissionDate) {
+                return 0;
+            }
+            // Strip time-of-day so we count whole calendar days, not fractions.
+            var aMid = new Date(admissionDate.getFullYear(), admissionDate.getMonth(), admissionDate.getDate());
+            var bMid = new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate());
+            var ms = bMid - aMid;
+            return Math.max(0, Math.round(ms / 86400000));
+        }
 
         function syncFromPatient() {
             var opt = patientSelect.options[patientSelect.selectedIndex];
@@ -154,7 +192,13 @@
                 wardInput.value = ward;
             }
 
-            // 2) Highlight / auto-select the patient's assigned caregivers
+            // 2) Auto-fill days under care (attendance_date - admission_date).
+            var days = computeDaysUnderCare(opt);
+            if (days !== null) {
+                daysInput.value = days;
+            }
+
+            // 3) Highlight / auto-select the patient's assigned caregivers
             var assignedIds = (opt.getAttribute('data-caregivers') || '')
                 .split(',')
                 .map(function (s) { return s.trim(); })
@@ -174,7 +218,7 @@
                 }
             }
 
-            // 3) Auto-pick the first assigned caregiver (if any) and only if user
+            // 4) Auto-pick the first assigned caregiver (if any) and only if user
             //    hasn't picked one yet (preserves user choice on form re-render).
             if (!caregiverSelect.value || caregiverSelect.value === '') {
                 if (assignedIds.length > 0) {
@@ -182,7 +226,7 @@
                 }
             }
 
-            // 4) Update hint
+            // 5) Update hint
             if (assignedIds.length === 0) {
                 caregiverHint.innerHTML = '<i class="fas fa-info-circle text-warning"></i> No caregiver assigned to this patient yet.';
             } else {
@@ -192,6 +236,10 @@
 
         if (patientSelect) {
             patientSelect.addEventListener('change', syncFromPatient);
+            // Re-calc days whenever the attendance date changes (back-fill case).
+            if (dateInput) {
+                dateInput.addEventListener('change', syncFromPatient);
+            }
             // Run once for the initial value (handles old() round-trip on validation errors)
             syncFromPatient();
         }

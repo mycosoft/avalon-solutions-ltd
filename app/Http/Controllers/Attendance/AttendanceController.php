@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Caregiver;
 use App\Models\Patient;
 use App\Models\UserNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -69,7 +70,12 @@ class AttendanceController extends Controller
         }
 
         $patient = Patient::with('caregivers')->find($request->patient_id);
-        $daysUnderCare = now()->diffInDays($patient->date_of_admission);
+        // Days under care is computed against the ATTENDANCE date (not today)
+        // so back-filled records report the correct count.
+        $attendanceDate = Carbon::parse($request->date);
+        $daysUnderCare = ($patient->date_of_admission && $patient->date_of_admission->lte($attendanceDate))
+            ? (int) $patient->date_of_admission->diffInDays($attendanceDate)
+            : 0;
 
         // Auto-fill caregiver from the patient's first assigned caregiver if none selected.
         $caregiverId = $request->caregiver_id;
