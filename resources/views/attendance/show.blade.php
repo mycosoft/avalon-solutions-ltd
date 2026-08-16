@@ -101,7 +101,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <a href="{{ route('attendance.edit', $attendance->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+                <a href="{{ route('attendance.edit', $attendance->id) }}" class="btn btn-info"><i class="fas fa-edit"></i> Edit</a>
                 <a href="{{ route('attendance.index') }}" class="btn btn-default ml-2">Back</a>
             </div>
         </div>

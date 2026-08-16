@@ -2,6 +2,60 @@
 
 @section('title', 'Add Caregiver')
 
+@section('css')
+<style>
+    .payment-plan-toggle {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .payment-plan-toggle input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .payment-plan-toggle .plan-option {
+        flex: 1;
+        min-width: 180px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all .15s ease;
+        background: #ffffff;
+    }
+    .payment-plan-toggle .plan-option i {
+        font-size: 22px;
+        color: #94a3b8;
+        transition: color .15s ease;
+    }
+    .payment-plan-toggle .plan-option strong {
+        display: block;
+        font-size: 14px;
+        color: #0f172a;
+    }
+    .payment-plan-toggle .plan-option small {
+        color: #64748b;
+        font-size: 12px;
+    }
+    .payment-plan-toggle input[type="radio"]:checked + .plan-option {
+        border-color: #17a2b8;
+        background: #e0f7fa;
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.18);
+    }
+    .payment-plan-toggle input[type="radio"]:checked + .plan-option i {
+        color: #17a2b8;
+    }
+    .payment-plan-toggle input[type="radio"]:focus + .plan-option {
+        outline: 2px solid rgba(23, 162, 184, 0.4);
+        outline-offset: 2px;
+    }
+</style>
+@stop
+
 @section('content_header')
     <div class="container-fluid">
         <div class="row mb-2">
@@ -23,7 +77,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">Caregiver Information</h3>
                     </div>
@@ -113,12 +167,57 @@
                                         <input type="text" class="form-control" id="level_of_education" name="level_of_education" value="{{ old('level_of_education') }}">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="date_of_entry">Date of Entry (Admission) *</label>
                                         <input type="date" class="form-control @error('date_of_entry') is-invalid @enderror" id="date_of_entry" name="date_of_entry" value="{{ old('date_of_entry', now()->format('Y-m-d')) }}" required>
                                         @error('date_of_entry')
                                             <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="monthly_rate">Pay Rate *</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }}</span>
+                                            </div>
+                                            <input type="number" step="0.01" min="0" class="form-control @error('monthly_rate') is-invalid @enderror" id="monthly_rate" name="monthly_rate" value="{{ old('monthly_rate', 0) }}" required>
+                                        </div>
+                                        @error('monthly_rate')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Payment Plan *</label>
+                                        <div class="payment-plan-toggle">
+                                            <input type="radio" id="plan_daily" name="payment_plan" value="daily" {{ old('payment_plan', 'daily') == 'daily' ? 'checked' : '' }}>
+                                            <label for="plan_daily" class="plan-option">
+                                                <i class="fas fa-calendar-day"></i>
+                                                <div>
+                                                    <strong>Daily</strong>
+                                                    <small>Paid every day</small>
+                                                </div>
+                                            </label>
+
+                                            <input type="radio" id="plan_monthly" name="payment_plan" value="monthly" {{ old('payment_plan') == 'monthly' ? 'checked' : '' }}>
+                                            <label for="plan_monthly" class="plan-option">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <div>
+                                                    <strong>Monthly</strong>
+                                                    <small>Paid every month</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Default is <strong>Daily</strong>. The Pay Rate above is interpreted per day for daily caregivers, per month for monthly caregivers.</small>
+                                        @error('payment_plan')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
@@ -177,7 +276,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Save Caregiver</button>
+                            <button type="submit" class="btn btn-info">Save Caregiver</button>
                             <a href="{{ route('caregivers.index') }}" class="btn btn-default ml-2">Cancel</a>
                         </div>
                     </form>

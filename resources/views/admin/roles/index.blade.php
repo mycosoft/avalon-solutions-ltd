@@ -68,7 +68,7 @@
                                         </td>
                                         <td>{{ $role->users->count() }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal{{ $role->id }}">
+                                            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal{{ $role->id }}">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             @if ($role->name !== 'superadmin')
@@ -116,7 +116,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                        <button type="submit" class="btn btn-info">Update</button>
                                                     </div>
                                                 </form>
                                             </div>

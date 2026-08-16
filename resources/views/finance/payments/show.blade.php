@@ -23,15 +23,15 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">Payment Information</h3>
                     </div>
                     <div class="card-body">
                         <table class="table table-striped">
                             <tr>
-                                <th width="150">Payment ID</th>
-                                <td>{{ $payment->id }}</td>
+                                <th width="150">Receipt #</th>
+                                <td><code>{{ $payment->receipt_number }}</code></td>
                             </tr>
                             <tr>
                                 <th>Patient</th>
@@ -93,7 +93,13 @@
                             </tr>
                             <tr>
                                 <th>Remaining Balance</th>
-                                <td class="text-danger font-weight-bold">{{ number_format($payment->balance, 2) }}</td>
+                                <td class="text-danger font-weight-bold">
+                                    @if((float) $payment->running_balance > 0)
+                                        {{ number_format($payment->running_balance, 2) }}
+                                    @else
+                                        <span class="badge badge-success">Cleared</span>
+                                    @endif
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -141,6 +147,9 @@
         <div class="row">
             <div class="col-md-12">
                 <a href="{{ route('payments.index') }}" class="btn btn-default">Back to Payments</a>
+                <a href="{{ route('payments.receipt', $payment->id) }}" class="btn btn-info ml-2" target="_blank">
+                    <i class="fas fa-print mr-1"></i> Print POS Receipt
+                </a>
             </div>
         </div>
     </div>

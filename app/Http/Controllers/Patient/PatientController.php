@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
+use App\Models\PatientStatusLog;
 use App\Models\Caregiver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -71,6 +72,14 @@ class PatientController extends Controller
 
         $patient = Patient::create($data);
 
+        // Seed the status log with the initial state so day-counting has a baseline.
+        PatientStatusLog::create([
+            'patient_id'     => $patient->id,
+            'status'         => $patient->patient_status,
+            'effective_date' => $patient->date_of_admission,
+            'notes'          => 'Initial status on admission.',
+        ]);
+
         if ($request->caregiver_ids) {
             $patient->caregivers()->attach($request->caregiver_ids, ['assignment_date' => now()]);
         }
@@ -80,12 +89,78 @@ class PatientController extends Controller
 
     public function show(Patient $patient)
     {
-        $patient->load('caregivers');
+        $patient->load(['caregivers', 'payments' => function ($query) {
+            $query->where('payee_for', 'patient')->orWhereNull('payee_for')->orderBy('payment_date', 'desc');
+        }]);
         $availableCaregivers = Caregiver::where('status', true)->whereDoesntHave('patients', function ($query) use ($patient) {
             $query->where('patient_id', $patient->id);
         })->get();
 
         return view('patient.show', compact('patient', 'availableCaregivers'));
+    }
+
+    /**
+     * Quick status change for a patient (on_ward / transferred / discharged).
+     * Updates the appropriate date + notes field automatically.
+     */
+    public function updateStatus(Request $request, Patient $patient)
+    {
+        $request->validate([
+            'patient_status'   => 'required|in:on_ward,transferred,discharged',
+            'date_of_discharge'=> 'nullable|date',
+            'date_of_transfer' => 'nullable|date',
+            'transfer_notes'   => 'nullable|string|max:2000',
+            'discharge_notes'  => 'nullable|string|max:2000',
+        ]);
+
+        $data = ['patient_status' => $request->patient_status];
+
+        if ($request->patient_status === 'discharged') {
+            $data['date_of_discharge'] = $request->date_of_discharge ?: now()->format('Y-m-d');
+            $data['discharge_notes']   = $request->discharge_notes;
+        } elseif ($request->patient_status === 'transferred') {
+            $data['date_of_transfer'] = $request->date_of_transfer ?: now()->format('Y-m-d');
+            $data['transfer_notes']   = $request->transfer_notes;
+        } else {
+            // back on ward — clear transfer/discharge dates
+            $data['date_of_discharge'] = null;
+            $data['discharge_notes']   = null;
+            $data['date_of_transfer']  = null;
+            $data['transfer_notes']    = null;
+        }
+
+        $patient->update($data);
+
+        // Record this transition in the patient's status log so that
+        // getDaysAdmittedAttribute() can pause/resume/stop counting correctly.
+        $effectiveDate = match ($request->patient_status) {
+            'discharged'  => $data['date_of_discharge'] ?? now()->format('Y-m-d'),
+            'transferred' => $data['date_of_transfer']  ?? now()->format('Y-m-d'),
+            default       => now()->format('Y-m-d'), // on_ward resumes today
+        };
+
+        $logNotes = match ($request->patient_status) {
+            'discharged'  => $request->discharge_notes,
+            'transferred' => $request->transfer_notes,
+            default       => $request->transfer_notes ?: $request->discharge_notes,
+        };
+
+        PatientStatusLog::create([
+            'patient_id'     => $patient->id,
+            'status'         => $request->patient_status,
+            'effective_date' => $effectiveDate,
+            'notes'          => $logNotes,
+        ]);
+
+        $label = [
+            'on_ward'    => 'returned to ward',
+            'transferred'=> 'transferred',
+            'discharged' => 'discharged',
+        ][$request->patient_status] ?? 'updated';
+
+        return redirect()
+            ->route('patients.show', $patient->id)
+            ->with('success', "Patient status changed to {$label} successfully.");
     }
 
     public function edit(Patient $patient)

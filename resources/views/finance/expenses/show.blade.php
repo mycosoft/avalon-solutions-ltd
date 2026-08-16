@@ -65,7 +65,7 @@
                         @endif
                     </div>
                     <div class="card-footer">
-                        <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-info"><i class="fas fa-edit"></i> Edit</a>
                         <a href="{{ route('expenses.index') }}" class="btn btn-default ml-2">Back</a>
                     </div>
                 </div>

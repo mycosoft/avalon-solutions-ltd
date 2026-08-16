@@ -69,9 +69,9 @@ return [
     'classes_content_wrapper' => '',
     'classes_content_header' => '',
     'classes_content' => '',
-    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
+    'classes_sidebar' => 'sidebar-dark-info elevation-4',
     'classes_sidebar_nav' => '',
-    'classes_topnav' => 'navbar-white navbar-light',
+    'classes_topnav' => 'navbar-info navbar-dark',
     'classes_topnav_nav' => 'navbar-expand',
     'classes_topnav_container' => 'container',
 
@@ -108,6 +108,10 @@ return [
     'laravel_js_path' => 'js/app.js',
 
     'menu' => [
+        [
+            'type' => 'sidebar-menu-search',
+            'text' => 'search',
+        ],
         [
             'type' => 'navbar-search',
             'text' => 'search',
@@ -152,6 +156,12 @@ return [
             'can' => 'accountant',
         ],
         [
+            'text' => 'Caregiver Payments',
+            'url' => 'caregiver-payments',
+            'icon' => 'fas fa-fw fa-hand-holding-usd',
+            'can' => 'accountant',
+        ],
+        [
             'text' => 'Expenses',
             'url' => 'expenses',
             'icon' => 'fas fa-fw fa-file-invoice-dollar',
@@ -189,6 +199,12 @@ return [
             'text' => 'Notifications',
             'url' => 'notifications',
             'icon' => 'fas fa-fw fa-bell',
+        ],
+        [
+            'text' => 'Settings',
+            'url' => 'settings',
+            'icon' => 'fas fa-fw fa-cog',
+            'can' => 'superadmin|admin',
         ],
         [
             'text' => 'Profile',

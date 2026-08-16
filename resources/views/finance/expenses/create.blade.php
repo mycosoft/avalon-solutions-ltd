@@ -61,12 +61,13 @@
 
                             <div class="form-group">
                                 <label for="category">Category *</label>
-                                <select class="form-control @error('category') is-invalid @enderror" id="category" name="category" required>
-                                    <option value="">Select Category</option>
-                                    @foreach($categories as $key => $label)
-                                        <option value="{{ $key }}" {{ old('category') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                <input list="category-suggestions" type="text" class="form-control @error('category') is-invalid @enderror" id="category" name="category" value="{{ old('category') }}" required placeholder="Type or pick a category">
+                                <datalist id="category-suggestions">
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat }}"></option>
                                     @endforeach
-                                </select>
+                                </datalist>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Type any category name, or pick from suggestions.</small>
                                 @error('category')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror

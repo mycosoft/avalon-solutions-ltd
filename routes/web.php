@@ -13,7 +13,10 @@ use App\Http\Controllers\Patient\PatientController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Finance\PaymentController;
 use App\Http\Controllers\Finance\Expense\ExpenseController;
+use App\Http\Controllers\Finance\CaregiverPaymentController;
+use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,6 +52,7 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
         Route::post('/patients/{patient}/assign-caregiver', [PatientController::class, 'assignCaregiver'])->name('patients.assign-caregiver');
         Route::post('/patients/{patient}/remove-caregiver/{caregiver}', [PatientController::class, 'removeCaregiver'])->name('patients.remove-caregiver');
+        Route::patch('/patients/{patient}/status', [PatientController::class, 'updateStatus'])->name('patients.update-status');
 
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::get('/attendance/create', [AttendanceController::class, 'create'])->name('attendance.create');
@@ -71,8 +75,16 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+        Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
         Route::get('/payments/patient-balance/{patientId}', [PaymentController::class, 'getPatientBalance'])->name('payments.patient-balance');
+
+        Route::get('/caregiver-payments', [CaregiverPaymentController::class, 'index'])->name('caregiver-payments.index');
+        Route::get('/caregiver-payments/create', [CaregiverPaymentController::class, 'create'])->name('caregiver-payments.create');
+        Route::post('/caregiver-payments', [CaregiverPaymentController::class, 'store'])->name('caregiver-payments.store');
+        Route::get('/caregiver-payments/{caregiver_payment}/receipt', [CaregiverPaymentController::class, 'receipt'])->name('caregiver-payments.receipt');
+        Route::get('/caregiver-payments/{caregiver_payment}', [CaregiverPaymentController::class, 'show'])->name('caregiver-payments.show');
+        Route::get('/caregiver-payments/caregiver-rate/{caregiverId}', [CaregiverPaymentController::class, 'getCaregiverRate'])->name('caregiver-payments.caregiver-rate');
 
         Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
         Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
@@ -81,6 +93,11 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
         Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
         Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{type}/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('/reports/{type}/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::get('/reports/{type}', [ReportController::class, 'show'])->name('reports.show');
     });
 
     Route::middleware(['role:superadmin'])->group(function () {
@@ -93,6 +110,12 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::post('/permissions', [RolePermissionController::class, 'permissionsStore'])->name('permissions.store');
         Route::put('/permissions/{permission}', [RolePermissionController::class, 'permissionsUpdate'])->name('permissions.update');
         Route::delete('/permissions/{permission}', [RolePermissionController::class, 'permissionsDestroy'])->name('permissions.destroy');
+    });
+
+    // Settings - superadmin & admin
+    Route::middleware(['role:superadmin|admin'])->group(function () {
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     });
 
     Route::get('/notifications/unread', [NotificationController::class, 'fetchUnread'])->name('notifications.unread');

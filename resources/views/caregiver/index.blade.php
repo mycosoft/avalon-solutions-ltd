@@ -26,7 +26,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Caregivers List</h3>
                         <div class="card-tools">
-                            <a href="{{ route('caregivers.create') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('caregivers.create') }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-plus"></i> Add Caregiver
                             </a>
                         </div>
@@ -45,7 +45,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                    <button type="submit" class="btn btn-info">Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -68,6 +68,8 @@
                                     <th>Gender</th>
                                     <th>Status</th>
                                     <th>Date of Entry</th>
+                                    <th>Rate</th>
+                                    <th>Plan</th>
                                     <th width="150">Actions</th>
                                 </tr>
                             </thead>
@@ -95,8 +97,18 @@
                                         </td>
                                         <td>{{ $caregiver->date_of_entry->format('Y-m-d') }}</td>
                                         <td>
+                                            <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 2) }} <small class="text-white-50">/ {{ $caregiver->payment_plan === 'monthly' ? 'mo' : 'day' }}</small></span>
+                                        </td>
+                                        <td>
+                                            @if($caregiver->payment_plan === 'monthly')
+                                                <span class="badge badge-primary"><i class="fas fa-calendar-alt mr-1"></i>Monthly</span>
+                                            @else
+                                                <span class="badge badge-success"><i class="fas fa-calendar-day mr-1"></i>Daily</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             <a href="{{ route('caregivers.show', $caregiver->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('caregivers.edit', $caregiver->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('caregivers.edit', $caregiver->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('caregivers.destroy', $caregiver->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
                                                 @csrf
                                                 @method('DELETE')
@@ -106,7 +118,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center">No caregivers found.</td>
+                                        <td colspan="11" class="text-center">No caregivers found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

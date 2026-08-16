@@ -46,6 +46,8 @@ class CaregiverController extends Controller
             'gender' => 'required|in:male,female',
             'level_of_education' => 'nullable|string|max:100',
             'date_of_entry' => 'required|date',
+            'monthly_rate' => 'nullable|numeric|min:0',
+            'payment_plan' => 'required|in:daily,monthly',
             'next_of_kin_name' => 'required|string|max:255',
             'next_of_kin_relationship' => 'required|string|max:50',
             'next_of_kin_phone' => 'required|string|max:20',
@@ -73,7 +75,7 @@ class CaregiverController extends Controller
 
     public function show(Caregiver $caregiver)
     {
-        $caregiver->load('patients');
+        $caregiver->load(['patients', 'payments']);
         return view('caregiver.show', compact('caregiver'));
     }
 
@@ -93,6 +95,8 @@ class CaregiverController extends Controller
             'gender' => 'required|in:male,female',
             'level_of_education' => 'nullable|string|max:100',
             'date_of_entry' => 'required|date',
+            'monthly_rate' => 'nullable|numeric|min:0',
+            'payment_plan' => 'required|in:daily,monthly',
             'next_of_kin_name' => 'required|string|max:255',
             'next_of_kin_relationship' => 'required|string|max:50',
             'next_of_kin_phone' => 'required|string|max:20',

@@ -28,27 +28,27 @@ class ExpenseController extends Controller
             $query->whereDate('expense_date', '<=', $request->date_to);
         })
         ->orderBy('expense_date', 'desc')
-        ->paginate(15);
+        ->paginate(15)->withQueryString();
 
-        $categories = Expense::categories();
+        $categories = Expense::allCategories();
 
         return view('finance.expenses.index', compact('expenses', 'categories'));
     }
 
     public function create()
     {
-        $categories = Expense::categories();
+        $categories = Expense::allCategories();
         return view('finance.expenses.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'description'  => 'required|string|max:255',
+            'amount'       => 'required|numeric|min:0',
             'expense_date' => 'required|date',
-            'category' => 'required|in:' . implode(',', array_keys(Expense::categories())),
-            'notes' => 'nullable|string',
+            'category'     => 'required|string|max:100',
+            'notes'        => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -80,18 +80,18 @@ class ExpenseController extends Controller
 
     public function edit(Expense $expense)
     {
-        $categories = Expense::categories();
+        $categories = Expense::allCategories();
         return view('finance.expenses.edit', compact('expense', 'categories'));
     }
 
     public function update(Request $request, Expense $expense)
     {
         $validator = Validator::make($request->all(), [
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'description'  => 'required|string|max:255',
+            'amount'       => 'required|numeric|min:0',
             'expense_date' => 'required|date',
-            'category' => 'required|in:' . implode(',', array_keys(Expense::categories())),
-            'notes' => 'nullable|string',
+            'category'     => 'required|string|max:100',
+            'notes'        => 'nullable|string',
         ]);
 
         if ($validator->fails()) {

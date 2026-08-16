@@ -26,7 +26,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Patients List</h3>
                         <div class="card-tools">
-                            <a href="{{ route('patients.create') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('patients.create') }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-plus"></i> Add Patient
                             </a>
                         </div>
@@ -46,7 +46,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                    <button type="submit" class="btn btn-info">Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -89,7 +89,7 @@
                                         <td>{{ $patient->date_of_admission->format('Y-m-d') }}</td>
                                         <td>
                                             <a href="{{ route('patients.show', $patient->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('patients.edit', $patient->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('patients.edit', $patient->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
                                                 @csrf
                                                 @method('DELETE')

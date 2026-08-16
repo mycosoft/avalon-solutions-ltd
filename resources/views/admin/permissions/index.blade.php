@@ -59,7 +59,7 @@
                                         <td><span class="badge badge-info">{{ $permission->guard_name }}</span></td>
                                         <td>{{ $permission->created_at->format('Y-m-d') }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal{{ $permission->id }}">
+                                            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal{{ $permission->id }}">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <form action="{{ route('permissions.destroy', $permission->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
@@ -88,7 +88,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                        <button type="submit" class="btn btn-info">Update</button>
                                                     </div>
                                                 </form>
                                             </div>

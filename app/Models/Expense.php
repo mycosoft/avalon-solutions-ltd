@@ -39,4 +39,24 @@ class Expense extends Model
             'other' => 'Other',
         ];
     }
+
+    /**
+     * All categories used in expenses — predefined set merged with
+     * distinct categories actually entered into the database.
+     * Useful for dynamic filters and form suggestions.
+     */
+    public static function allCategories(): array
+    {
+        $predefined = array_values(self::categories());
+
+        $fromDb = self::query()
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category')
+            ->all();
+
+        return array_values(array_unique(array_merge($predefined, $fromDb)));
+    }
 }

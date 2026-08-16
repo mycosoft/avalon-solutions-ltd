@@ -27,7 +27,7 @@
                     <div class="card-header">
                         <h3 class="card-title">User Information</h3>
                         <div class="card-tools">
-                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </div>

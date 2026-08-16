@@ -23,7 +23,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-8">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">Edit Expense</h3>
                     </div>
@@ -62,11 +62,13 @@
 
                             <div class="form-group">
                                 <label for="category">Category *</label>
-                                <select class="form-control @error('category') is-invalid @enderror" id="category" name="category" required>
-                                    @foreach($categories as $key => $label)
-                                        <option value="{{ $key }}" {{ old('category', $expense->category) == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                <input list="category-suggestions" type="text" class="form-control @error('category') is-invalid @enderror" id="category" name="category" value="{{ old('category', $expense->category) }}" required placeholder="Type or pick a category">
+                                <datalist id="category-suggestions">
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat }}"></option>
                                     @endforeach
-                                </select>
+                                </datalist>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Type any category name, or pick from suggestions.</small>
                                 @error('category')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -78,7 +80,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Update Expense</button>
+                            <button type="submit" class="btn btn-info">Update Expense</button>
                             <a href="{{ route('expenses.index') }}" class="btn btn-default ml-2">Cancel</a>
                         </div>
                     </form>

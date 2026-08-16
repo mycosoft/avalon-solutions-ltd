@@ -26,7 +26,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Attendance Records</h3>
                         <div class="card-tools">
-                            <a href="{{ route('attendance.create') }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('attendance.create') }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-plus"></i> New Attendance
                             </a>
                         </div>
@@ -54,7 +54,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                    <button type="submit" class="btn btn-info">Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -95,7 +95,7 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('attendance.show', $att->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('attendance.edit', $att->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('attendance.edit', $att->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('attendance.destroy', $att->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
                                                 @csrf
                                                 @method('DELETE')

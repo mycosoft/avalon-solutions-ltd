@@ -102,7 +102,7 @@
                                         <span class="text-muted"><small>Contact admin to change role</small></span>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                                    <button type="submit" class="btn btn-info">Update Profile</button>
                                 </form>
                             </div>
 
@@ -143,7 +143,7 @@
                                         <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation">
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary">Change Password</button>
+                                    <button type="submit" class="btn btn-info">Change Password</button>
                                 </form>
                             </div>
                         </div>

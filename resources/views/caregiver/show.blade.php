@@ -54,8 +54,31 @@
                             <li class="list-group-item">
                                 <b>Level of Education</b> <a class="float-right">{{ $caregiver->level_of_education ?? 'N/A' }}</a>
                             </li>
+                            <li class="list-group-item">
+                                <b>Rate</b>
+                                <a class="float-right">
+                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 2) }} <small class="text-white-50">/ {{ $caregiver->payment_plan === 'monthly' ? 'month' : 'day' }}</small></span>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Payment Plan</b>
+                                <a class="float-right">
+                                    @if($caregiver->payment_plan === 'monthly')
+                                        <span class="badge badge-primary"><i class="fas fa-calendar-alt mr-1"></i>Monthly</span>
+                                    @else
+                                        <span class="badge badge-success"><i class="fas fa-calendar-day mr-1"></i>Daily</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Effective Daily Rate</b>
+                                <a class="float-right">
+                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->daily_rate, 2) }}</span>
+                                </a>
+                            </li>
                         </ul>
-                        <a href="{{ route('caregivers.edit', $caregiver->id) }}" class="btn btn-primary btn-block"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{{ route('caregivers.edit', $caregiver->id) }}" class="btn btn-info btn-block"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{{ route('caregiver-payments.create', ['caregiver_id' => $caregiver->id]) }}" class="btn btn-success btn-block mt-2"><i class="fas fa-money-bill-wave"></i> Pay Caregiver</a>
                     </div>
                 </div>
 
@@ -128,6 +151,48 @@
                             </table>
                         @else
                             <p class="text-muted">No patients assigned to this caregiver.</p>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Payment History ({{ $caregiver->payments->count() }})</h3>
+                        <div class="card-tools">
+                            <a href="{{ route('caregiver-payments.index', ['caregiver_id' => $caregiver->id]) }}" class="btn btn-tool text-white"><i class="fas fa-external-link-alt"></i></a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        @if($caregiver->payments->count() > 0)
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Receipt #</th>
+                                        <th>Date</th>
+                                        <th class="text-right">Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($caregiver->payments->take(5) as $payment)
+                                        <tr>
+                                            <td><small>{{ $payment->receipt_number }}</small></td>
+                                            <td>{{ $payment->payment_date->format('Y-m-d') }}</td>
+                                            <td class="text-right">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $payment->amount, 2) }}</td>
+                                            <td>
+                                                <a href="{{ route('caregiver-payments.show', $payment->id) }}" class="btn btn-info btn-xs"><i class="fas fa-eye"></i></a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            @if($caregiver->payments->count() > 5)
+                                <div class="card-footer text-center">
+                                    <a href="{{ route('caregiver-payments.index', ['caregiver_id' => $caregiver->id]) }}" class="text-info">View all {{ $caregiver->payments->count() }} payments</a>
+                                </div>
+                            @endif
+                        @else
+                            <p class="text-muted text-center p-3 mb-0">No payments made to this caregiver yet.</p>
                         @endif
                     </div>
                 </div>

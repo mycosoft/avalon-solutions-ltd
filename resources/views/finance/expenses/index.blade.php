@@ -37,8 +37,8 @@
                                 <div class="col-md-3">
                                     <select name="category" class="form-control">
                                         <option value="">All Categories</option>
-                                        @foreach($categories as $key => $label)
-                                            <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -49,7 +49,7 @@
                                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                    <button type="submit" class="btn btn-info">Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -79,12 +79,12 @@
                                         <td>{{ $expense->id }}</td>
                                         <td>{{ $expense->expense_date->format('Y-m-d') }}</td>
                                         <td>{{ $expense->description }}</td>
-                                        <td><span class="badge badge-info">{{ $categories[$expense->category] ?? $expense->category }}</span></td>
+                                        <td><span class="badge badge-info">{{ $expense->category }}</span></td>
                                         <td>{{ number_format($expense->amount, 2) }}</td>
                                         <td>{{ $expense->recorded_by ?? 'N/A' }}</td>
                                         <td>
                                             <a href="{{ route('expenses.show', $expense->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
                                                 @csrf
                                                 @method('DELETE')

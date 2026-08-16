@@ -22,7 +22,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">Payment Records</h3>
                         <div class="card-tools">
@@ -49,7 +49,7 @@
                                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}" placeholder="To">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                    <button type="submit" class="btn btn-info">Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -96,6 +96,9 @@
                                         <td>{{ number_format($pmt->balance, 2) }}</td>
                                         <td>
                                             <a href="{{ route('payments.show', $pmt->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                                            <a href="{{ route('payments.receipt', $pmt->id) }}" class="btn btn-default btn-sm" target="_blank" title="Print Receipt">
+                                                <i class="fas fa-print"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 @empty

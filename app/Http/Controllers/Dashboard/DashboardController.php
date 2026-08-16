@@ -29,6 +29,8 @@ class DashboardController extends Controller
 
         // Basic counts
         $totalCaregivers = Caregiver::count();
+        $activeCaregivers = Caregiver::where('status', true)->count();
+        $inactiveCaregivers = Caregiver::where('status', false)->count();
         $totalPatients = Patient::count();
         $patientsOnWard = Patient::where('patient_status', 'on_ward')->count();
         $patientsDischarged = Patient::where('patient_status', 'discharged')->count();
@@ -54,6 +56,19 @@ class DashboardController extends Controller
             ->pluck('count', 'role_type')
             ->toArray();
 
+        // Patient status distribution for pie chart
+        $patientStatusDistribution = Patient::select('patient_status')
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy('patient_status')
+            ->pluck('count', 'patient_status')
+            ->toArray();
+
+        $patientStatusDistribution = array_merge([
+            'on_ward' => 0,
+            'transferred' => 0,
+            'discharged' => 0,
+        ], $patientStatusDistribution);
+
         // 6-month chart data
         $chartLabels = [];
         $chartPayments = [];
@@ -71,11 +86,13 @@ class DashboardController extends Controller
         }
 
         // Recent records
-        $recentPatients = Patient::latest()->take(5)->get();
+        $recentPayments = Payment::with('patient')->latest()->take(5)->get();
         $recentAttendances = Attendance::with(['caregiver', 'patient'])->latest()->take(5)->get();
 
         return [
             'total_caregivers' => $totalCaregivers,
+            'active_caregivers' => $activeCaregivers,
+            'inactive_caregivers' => $inactiveCaregivers,
             'total_patients' => $totalPatients,
             'patients_on_ward' => $patientsOnWard,
             'patients_discharged' => $patientsDischarged,
@@ -96,13 +113,15 @@ class DashboardController extends Controller
 
             'role_distribution' => $roleDistribution,
 
+            'patient_status_distribution' => $patientStatusDistribution,
+
             'chart' => [
                 'labels' => $chartLabels,
                 'payments' => $chartPayments,
                 'expenses' => $chartExpenses,
             ],
 
-            'recent_patients' => $recentPatients,
+            'recent_payments' => $recentPayments,
             'recent_attendances' => $recentAttendances,
         ];
     }

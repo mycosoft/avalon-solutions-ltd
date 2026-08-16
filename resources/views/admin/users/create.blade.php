@@ -23,7 +23,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">New User</h3>
                     </div>
@@ -88,7 +88,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Create User</button>
+                            <button type="submit" class="btn btn-info">Create User</button>
                             <a href="{{ route('users.index') }}" class="btn btn-default ml-2">Cancel</a>
                         </div>
                     </form>

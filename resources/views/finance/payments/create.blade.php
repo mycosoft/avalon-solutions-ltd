@@ -95,7 +95,8 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="amount_paid">Amount Paid *</label>
-                                        <input type="number" step="0.01" class="form-control @error('amount_paid') is-invalid @enderror" id="amount_paid" name="amount_paid" value="{{ old('amount_paid') }}" required placeholder="Enter amount">
+                                        <input type="number" step="0.01" class="form-control @error('amount_paid') is-invalid @enderror" id="amount_paid" name="amount_paid" value="{{ old('amount_paid') }}" required>
+                                        <small class="text-muted" id="rate_hint">Select a patient to auto-fill the amount.</small>
                                         @error('amount_paid')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -126,37 +127,37 @@
             <div class="col-md-4">
                 <div class="card card-info">
                     <div class="card-header">
-                        <h3 class="card-title">Patient Payment Summary</h3>
+                        <h3 class="card-title">Patient Balance Summary</h3>
                     </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
                             <tr>
                                 <th>Patient</th>
                                 <td>{{ $patient->name }}</td>
                             </tr>
                             <tr>
                                 <th>Daily Rate</th>
-                                <td>{{ number_format($patient->amount_to_pay, 2) }}</td>
+                                <td>{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($patient->amount_to_pay, 2) }}</td>
                             </tr>
                             <tr>
                                 <th>Admission Date</th>
                                 <td>{{ $patient->date_of_admission->format('Y-m-d') }}</td>
                             </tr>
                             <tr>
-                                <th>Total Days</th>
-                                <td>{{ $totalDays }}</td>
+                                <th>Days Admitted</th>
+                                <td><strong>{{ $totalDays }}</strong> {{ $patient->patient_status === 'discharged' ? '(discharged)' : 'days' }}</td>
+                            </tr>
+                            <tr class="bg-light">
+                                <th>Total Due</th>
+                                <td class="font-weight-bold">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($totalDue, 2) }}</td>
                             </tr>
                             <tr>
-                                <th>Total Amount</th>
-                                <td>{{ number_format($totalAmount, 2) }}</td>
+                                <th>Total Paid</th>
+                                <td class="text-success">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($paidAmount, 2) }}</td>
                             </tr>
-                            <tr>
-                                <th>Already Paid</th>
-                                <td>{{ number_format($paidAmount, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Current Balance</th>
-                                <td class="text-danger font-weight-bold">{{ number_format($balance, 2) }}</td>
+                            <tr class="bg-warning">
+                                <th>Balance Due</th>
+                                <td class="font-weight-bold text-danger">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($balance, 2) }}</td>
                             </tr>
                         </table>
                     </div>
@@ -169,18 +170,56 @@
 
 @section('js')
 <script>
+    var lastBalance = 0;
+    var lastRate    = 0;
+
+    function recalcAmount() {
+        var days = parseInt($('#days_paid').val()) || 1;
+        var suggested = (lastRate * days).toFixed(2);
+        if (!$('#amount_paid').data('touched')) {
+            $('#amount_paid').val(suggested);
+        }
+    }
+
     $('#patient_id').change(function() {
         var patientId = $(this).val();
-        if (patientId) {
-            var dailyRate = $('option:selected', this).text().match(/[\d,]+\.\d{2}/);
-            $.get('/payments/patient-balance/' + patientId, function(data) {
-                $('#balance_display').val(data.balance.toFixed(2));
-                if (data.daily_rate) {
-                    var suggestedAmount = data.daily_rate;
-                    $('#amount_paid').attr('placeholder', 'Min: ' + suggestedAmount.toFixed(2));
-                }
-            });
+        if (!patientId) {
+            $('#balance_display').val('0.00');
+            lastRate = 0;
+            $('#amount_paid').data('touched', false).val('');
+            $('#rate_hint').text('Select a patient to auto-fill the amount.');
+            return;
         }
+
+        $.get('/payments/patient-balance/' + patientId, function(data) {
+            $('#balance_display').val(parseFloat(data.balance).toFixed(2));
+            lastBalance = parseFloat(data.balance);
+            lastRate    = parseFloat(data.daily_rate);
+            $('#rate_hint').html(
+                '<i class="fas fa-info-circle text-info"></i> Daily rate: <strong>'
+                + lastRate.toFixed(2) + '</strong> &middot; Outstanding: <strong>'
+                + lastBalance.toFixed(2) + '</strong>'
+            );
+
+            // Auto-populate amount if empty (or recompute based on days_paid)
+            $('#amount_paid').data('touched', false);
+            recalcAmount();
+        });
     });
+
+    // Mark amount as touched when user manually edits it
+    $('#amount_paid').on('input', function() {
+        $(this).data('touched', true);
+    });
+
+    // Recompute suggested amount when days change
+    $('#days_paid').on('input', function() {
+        recalcAmount();
+    });
+
+    // Trigger initial fetch if patient is pre-selected (e.g. ?patient_id=)
+    @if($patient)
+        $('#patient_id').trigger('change');
+    @endif
 </script>
 @stop

@@ -27,7 +27,7 @@
                         <h3 class="card-title">All Notifications</h3>
                         @if($notifications->where('read_at', null)->count() > 0)
                             <div class="card-tools">
-                                <button onclick="event.preventDefault(); document.getElementById('mark-all-form').submit();" class="btn btn-primary btn-sm">
+                                <button onclick="event.preventDefault(); document.getElementById('mark-all-form').submit();" class="btn btn-info btn-sm">
                                     Mark All as Read
                                 </button>
                                 <form id="mark-all-form" action="{{ route('notifications.mark-all-read') }}" method="POST" style="display: none;">
@@ -64,7 +64,7 @@
                                         <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                     </div>
                                     @if(!$notification->read_at)
-                                        <a href="{{ route('notifications.read', $notification->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ route('notifications.read', $notification->id) }}" class="btn btn-sm btn-outline-info">
                                             Mark as Read
                                         </a>
                                     @endif

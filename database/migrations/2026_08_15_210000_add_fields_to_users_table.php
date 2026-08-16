@@ -12,14 +12,12 @@ return new class extends Migration
             $table->string('phone', 20)->nullable()->after('email');
             $table->enum('role_type', ['superadmin', 'admin', 'accountant'])->nullable()->after('phone');
             $table->boolean('status')->default(true)->after('role_type');
-            $table->softDeletes();
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes();
             $table->dropColumn(['phone', 'role_type', 'status']);
         });
     }

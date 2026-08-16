@@ -43,20 +43,20 @@ class PaymentController extends Controller
         $patient = null;
         $balance = 0;
         $totalDays = 0;
-        $totalAmount = 0;
+        $totalDue = 0;
         $paidAmount = 0;
 
         if ($patientId) {
             $patient = Patient::findOrFail($patientId);
-            $totalDays = now()->diffInDays($patient->date_of_admission);
-            $totalAmount = $totalDays * $patient->amount_to_pay;
-            $paidAmount = Payment::where('patient_id', $patientId)->sum('amount_paid');
-            $balance = max(0, $totalAmount - $paidAmount);
+            $totalDays = $patient->days_admitted;
+            $totalDue  = $patient->total_due;
+            $paidAmount = $patient->total_paid;
+            $balance   = $patient->balance;
         }
 
         $patients = Patient::where('is_active', true)->get();
 
-        return view('finance.payments.create', compact('patients', 'patient', 'balance', 'totalDays', 'totalAmount', 'paidAmount'));
+        return view('finance.payments.create', compact('patients', 'patient', 'balance', 'totalDays', 'totalDue', 'paidAmount'));
     }
 
     public function store(Request $request)
@@ -80,28 +80,41 @@ class PaymentController extends Controller
         $periodStart = $request->payment_date;
         $periodEnd = now()->addDays($request->days_paid - 1)->format('Y-m-d');
 
-        $totalDays = now()->diffInDays($patient->date_of_admission);
-        $totalAmount = $totalDays * $dailyRate;
-        $paidAmount = Payment::where('patient_id', $request->patient_id)->sum('amount_paid');
-        $previousBalance = max(0, $totalAmount - $paidAmount);
+        // Compute the new running balance as:
+        //   (current total due at this moment) - (cumulative payments up to & incl. this one)
+        // The cumulative includes the amount we are about to record.
+        $totalDue   = $patient->total_due;
+        $paidBefore = (float) Payment::where('patient_id', $patient->id)
+            ->where(function ($q) {
+                $q->where('payee_for', 'patient')->orWhereNull('payee_for');
+            })
+            ->where(function ($q) use ($request) {
+                $q->where('payment_date', '<', $request->payment_date)
+                  ->orWhere(function ($q2) use ($request) {
+                      $q2->where('payment_date', '=', $request->payment_date);
+                  });
+            })
+            ->sum('amount_paid');
 
-        $newBalance = max(0, $previousBalance - $request->amount_paid);
+        $newBalance = max(0, round($totalDue - ($paidBefore + $request->amount_paid), 2));
         $paymentType = $newBalance > 0 ? 'partial' : 'full';
 
         $payment = Payment::create([
-            'patient_id' => $request->patient_id,
-            'payee_name' => $request->payee_name,
-            'amount_paid' => $request->amount_paid,
-            'daily_rate' => $dailyRate,
-            'days_paid' => $request->days_paid,
-            'payment_date' => $request->payment_date,
-            'period_start' => $periodStart,
-            'period_end' => $periodEnd,
+            'payee_for'      => 'patient',
+            'patient_id'     => $request->patient_id,
+            'payee_name'     => $request->payee_name,
+            'amount_paid'    => $request->amount_paid,
+            'daily_rate'     => $dailyRate,
+            'monthly_rate'   => null,
+            'days_paid'      => $request->days_paid,
+            'payment_date'   => $request->payment_date,
+            'period_start'   => $periodStart,
+            'period_end'     => $periodEnd,
             'payment_method' => $request->payment_method,
-            'payment_type' => $paymentType,
-            'balance' => $newBalance,
-            'notes' => $request->notes,
-            'recorded_by' => Auth::user()->name,
+            'payment_type'   => $paymentType,
+            'balance'        => $newBalance,
+            'notes'          => $request->notes,
+            'recorded_by'    => Auth::user()->name,
         ]);
 
         if ($newBalance > 0) {
@@ -118,7 +131,10 @@ class PaymentController extends Controller
             );
         }
 
-        return redirect()->route('payments.index')->with('success', 'Payment recorded successfully.');
+        return redirect()
+            ->route('payments.index')
+            ->with('receipt_payment_id', $payment->id)
+            ->with('success', 'Payment recorded successfully.');
     }
 
     public function show(Payment $payment)
@@ -127,21 +143,28 @@ class PaymentController extends Controller
         return view('finance.payments.show', compact('payment'));
     }
 
+    public function receipt(Payment $payment)
+    {
+        $payment->load('patient');
+        return view('finance.payments.receipt', [
+            'payment'   => $payment,
+            'payeeType' => 'patient',
+        ]);
+    }
+
     public function getPatientBalance($patientId)
     {
         $patient = Patient::findOrFail($patientId);
-        $totalDays = now()->diffInDays($patient->date_of_admission);
-        $totalAmount = $totalDays * $patient->amount_to_pay;
-        $paidAmount = Payment::where('patient_id', $patientId)->sum('amount_paid');
-        $balance = max(0, $totalAmount - $paidAmount);
 
         return response()->json([
-            'patient' => $patient,
-            'daily_rate' => $patient->amount_to_pay,
-            'total_days' => $totalDays,
-            'total_amount' => $totalAmount,
-            'paid_amount' => $paidAmount,
-            'balance' => $balance,
+            'patient'     => $patient,
+            'daily_rate'  => (float) $patient->amount_to_pay,
+            'total_days'  => $patient->days_admitted,
+            'total_due'   => $patient->total_due,
+            'paid_amount' => $patient->total_paid,
+            'balance'     => $patient->balance,
+            'days_owed'   => $patient->days_owed,
+            'admission'   => $patient->date_of_admission?->format('Y-m-d'),
         ]);
     }
 }
