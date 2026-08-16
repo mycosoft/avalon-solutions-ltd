@@ -25,7 +25,7 @@
         /* Main sidebar shell ------------------------------------------------- */
         .main-sidebar,
         .main-sidebar .sidebar {
-            background-color: #19647E !important;
+            background-color: #074458ff !important;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
             border-right: 1px solid var(--sidebar-border);
         }
