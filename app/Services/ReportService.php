@@ -630,44 +630,6 @@ class ReportService
             ->get()
             ->keyBy('patient_id');
 
-        // Ward-level roll-up for the headline summary.
-        $wards = [];
-        foreach ($patients as $pt) {
-            $wardKey = $pt->ward ?: '__unassigned__';
-            $wardName = $pt->ward ?: 'Unassigned Ward';
-            if (! isset($wards[$wardKey])) {
-                $wards[$wardKey] = [
-                    'name'       => $wardName,
-                    'patients'   => 0,
-                    'visited'    => 0,
-                    'pending'    => 0,
-                    'complaints' => 0,
-                ];
-            }
-            $wards[$wardKey]['patients']++;
-            $visit = $todayVisits->get($pt->id);
-            if ($visit) {
-                $wards[$wardKey]['visited']++;
-                if (filled($visit->complaint_reported)) {
-                    $wards[$wardKey]['complaints']++;
-                }
-            } else {
-                $wards[$wardKey]['pending']++;
-            }
-        }
-
-        $wardRows = [];
-        foreach ($wards as $w) {
-            $wardRows[] = [
-                $w['name'],
-                $w['patients'],
-                $w['visited'],
-                $w['pending'],
-                $w['complaints'],
-            ];
-        }
-        usort($wardRows, fn ($a, $b) => strcmp((string) $a[0], (string) $b[0]));
-
         // Per-patient ward-round rows (full listing + pending subset).
         $roundRows = [];
         $pendingRows = [];
@@ -721,13 +683,6 @@ class ReportService
             ['label' => 'Visited Today',    'value' => $totalVisited,      'class' => 'success'],
             ['label' => 'Pending Visits',   'value' => max(0, $patients->count() - $totalVisited), 'class' => 'warning'],
             ['label' => 'Complaints Today', 'value' => $totalComplaints,    'class' => 'danger'],
-        ];
-
-        $report['sections'][] = [
-            'title'   => 'Ward Roll-up',
-            'headers' => ['Ward', 'Patients', 'Visited', 'Pending', 'Complaints'],
-            'rows'    => $wardRows,
-            'empty'   => empty($wardRows) ? 'No active on-ward patients match the selected filters.' : null,
         ];
 
         $report['sections'][] = [
