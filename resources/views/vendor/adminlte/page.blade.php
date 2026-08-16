@@ -9,23 +9,23 @@
     <style>
         /* =========================================================
            Avalon Solutions - Sidebar Dark Theme
-           Palette: deep slate with cyan accent for active items
+           Palette: brand teal #19647E with deeper shades for hover
            ========================================================= */
         :root {
-            --sidebar-bg: #1e293b;          /* slate-800 */
-            --sidebar-bg-2: #0f172a;        /* slate-900 (brand) */
-            --sidebar-bg-3: #334155;        /* slate-700 (hover) */
-            --sidebar-accent: #06b6d4;      /* cyan-500 (active) */
+            --sidebar-bg: #19647E;          /* brand teal (main background) */
+            --sidebar-bg-2: #134858;        /* deeper teal (brand-link / contrast) */
+            --sidebar-bg-3: #2189ab;        /* lighter teal (hover) */
+            --sidebar-accent: #06b6d4;      /* cyan-500 (active indicator) */
             --sidebar-accent-soft: rgba(6, 182, 212, 0.18);
-            --sidebar-text: #e2e8f0;        /* slate-200 */
-            --sidebar-text-muted: #94a3b8;  /* slate-400 */
-            --sidebar-border: rgba(255, 255, 255, 0.08);
+            --sidebar-text: #f8fafc;        /* white (high contrast on teal) */
+            --sidebar-text-muted: #cbd5e1;  /* slate-300 */
+            --sidebar-border: rgba(255, 255, 255, 0.10);
         }
 
         /* Main sidebar shell ------------------------------------------------- */
         .main-sidebar,
         .main-sidebar .sidebar {
-            background: linear-gradient(180deg, #1e293b 0%, #172033 100%) !important;
+            background: linear-gradient(180deg, #19647E 0%, #134858 100%) !important;
             box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
             border-right: 1px solid var(--sidebar-border);
         }
@@ -40,7 +40,7 @@
         }
 
         .main-sidebar .brand-link:hover {
-            background-color: #020617 !important;
+            background-color: #0d3a48 !important;
             color: #ffffff !important;
         }
 
