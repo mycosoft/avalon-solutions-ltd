@@ -66,7 +66,7 @@ class ReportService
 
     private function money($value): string
     {
-        return number_format((float) $value, 2);
+        return number_format((float) $value, 0);
     }
 
     private function baseReport(string $type, string $title, string $description, array $filters): array

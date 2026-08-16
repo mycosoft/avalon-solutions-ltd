@@ -86,8 +86,8 @@
                                                 {{ $pmt->period_end->format('M d, Y') }}
                                             </small>
                                         </td>
-                                        <td>{{ number_format($pmt->monthly_rate ?? 0, 2) }}</td>
-                                        <td><strong>{{ number_format($pmt->amount_paid, 2) }}</strong></td>
+                                        <td>{{ number_format($pmt->monthly_rate ?? 0, 0) }}</td>
+                                        <td><strong>{{ number_format($pmt->amount_paid, 0) }}</strong></td>
                                         <td>{{ ucfirst(str_replace('_', ' ', $pmt->payment_method)) }}</td>
                                         <td>
                                             <a href="{{ route('caregiver-payments.show', $pmt->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>

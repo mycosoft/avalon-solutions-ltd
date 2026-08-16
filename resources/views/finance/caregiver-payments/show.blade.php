@@ -53,8 +53,8 @@
                     </div>
                     <div class="card-body">
                         <table class="table table-striped">
-                            <tr><th width="150">Monthly Rate</th><td>{{ number_format($payment->monthly_rate ?? 0, 2) }}</td></tr>
-                            <tr><th>Amount Paid</th><td class="text-info font-weight-bold" style="font-size: 1.25rem;">{{ number_format($payment->amount_paid, 2) }}</td></tr>
+                            <tr><th width="150">Monthly Rate</th><td>{{ number_format($payment->monthly_rate ?? 0, 0) }}</td></tr>
+                            <tr><th>Amount Paid</th><td class="text-info font-weight-bold" style="font-size: 1.25rem;">{{ number_format($payment->amount_paid, 0) }}</td></tr>
                         </table>
                         <a href="{{ route('caregiver-payments.receipt', $payment->id) }}" class="btn btn-info" target="_blank">
                             <i class="fas fa-print mr-1"></i> Print Receipt

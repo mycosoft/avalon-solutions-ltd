@@ -69,7 +69,7 @@
                             <li class="list-group-item">
                                 <b>Daily Amount</b>
                                 <span class="float-right">
-                                    {{ $currency }} {{ number_format($patient->amount_to_pay, 2) }}
+                                    {{ $currency }} {{ number_format($patient->amount_to_pay, 0) }}
                                 </span>
                             </li>
                             <li class="list-group-item">
@@ -306,10 +306,10 @@
                                     <tr class="bg-light">
                                         <th colspan="3" class="text-right">Totals:</th>
                                         <th class="text-right text-success">
-                                            {{ $currency }} {{ number_format($totalPaid, 2) }}
+                                            {{ $currency }} {{ number_format($totalPaid, 0) }}
                                         </th>
                                         <th class="text-right text-danger">
-                                            {{ $currency }} {{ number_format($balance, 2) }}
+                                            {{ $currency }} {{ number_format($balance, 0) }}
                                         </th>
                                         <th colspan="2"></th>
                                     </tr>

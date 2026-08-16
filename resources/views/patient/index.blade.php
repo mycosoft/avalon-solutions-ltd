@@ -79,7 +79,7 @@
                                         <td>{{ $patient->name }}</td>
                                         <td>{{ $patient->phone }}</td>
                                         <td>{{ $patient->ward ?? 'N/A' }}</td>
-                                        <td>{{ number_format($patient->amount_to_pay, 2) }}</td>
+                                        <td>{{ number_format($patient->amount_to_pay, 0) }}</td>
                                         <td>{{ ucfirst($patient->gender) }}</td>
                                         <td>
                                             <span class="badge badge-{{ $patient->patient_status === 'on_ward' ? 'primary' : ($patient->patient_status === 'transferred' ? 'warning' : 'success') }}">

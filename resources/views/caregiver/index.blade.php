@@ -97,7 +97,7 @@
                                         </td>
                                         <td>{{ $caregiver->date_of_entry->format('Y-m-d') }}</td>
                                         <td>
-                                            <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 2) }} <small class="text-white-50">/ {{ $caregiver->payment_plan === 'monthly' ? 'mo' : 'day' }}</small></span>
+                                            <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 0) }}</span>
                                         </td>
                                         <td>
                                             @if($caregiver->payment_plan === 'monthly')

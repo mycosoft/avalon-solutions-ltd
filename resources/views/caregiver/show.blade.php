@@ -57,7 +57,7 @@
                             <li class="list-group-item">
                                 <b>Rate</b>
                                 <a class="float-right">
-                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 2) }} <small class="text-white-50">/ {{ $caregiver->payment_plan === 'monthly' ? 'month' : 'day' }}</small></span>
+                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->monthly_rate, 0) }}</span>
                                 </a>
                             </li>
                             <li class="list-group-item">
@@ -73,7 +73,7 @@
                             <li class="list-group-item">
                                 <b>Effective Daily Rate</b>
                                 <a class="float-right">
-                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->daily_rate, 2) }}</span>
+                                    <span class="badge badge-info">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $caregiver->daily_rate, 0) }}</span>
                                 </a>
                             </li>
                         </ul>
@@ -178,7 +178,7 @@
                                         <tr>
                                             <td><small>{{ $payment->receipt_number }}</small></td>
                                             <td>{{ $payment->payment_date->format('Y-m-d') }}</td>
-                                            <td class="text-right">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $payment->amount, 2) }}</td>
+                                            <td class="text-right">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format((float) $payment->amount, 0) }}</td>
                                             <td>
                                                 <a href="{{ route('caregiver-payments.show', $payment->id) }}" class="btn btn-info btn-xs"><i class="fas fa-eye"></i></a>
                                             </td>

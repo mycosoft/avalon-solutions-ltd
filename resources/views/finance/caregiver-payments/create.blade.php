@@ -38,7 +38,7 @@
                                             <option value="">Select Caregiver</option>
                                             @foreach($caregivers as $cg)
                                                 <option value="{{ $cg->id }}" data-rate="{{ $cg->monthly_rate }}" {{ old('caregiver_id', $caregiver?->id) == $cg->id ? 'selected' : '' }}>
-                                                    {{ $cg->name }} — {{ number_format($cg->monthly_rate, 2) }}/month
+                                                    {{ $cg->name }} — {{ number_format($cg->monthly_rate, 0) }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -144,13 +144,12 @@
                             <tr>
                                 <th>Pay Rate</th>
                                 <td class="font-weight-bold text-info">
-                                    {{ number_format((float) $caregiver->monthly_rate, 2) }}
-                                    <small class="text-muted">/ {{ $caregiver->payment_plan === 'monthly' ? 'month' : 'day' }}</small>
+                                    {{ number_format((float) $caregiver->monthly_rate, 0) }}
                                 </td>
                             </tr>
                             <tr>
                                 <th>Effective Daily Rate</th>
-                                <td>{{ number_format((float) $caregiver->daily_rate, 2) }}</td>
+                                <td>{{ number_format((float) $caregiver->daily_rate, 0) }}</td>
                             </tr>
                         </table>
                     </div>

@@ -39,7 +39,7 @@
                             </tr>
                             <tr>
                                 <th>Amount</th>
-                                <td class="text-danger font-weight-bold">{{ number_format($expense->amount, 2) }}</td>
+                                <td class="text-danger font-weight-bold">{{ number_format($expense->amount, 0) }}</td>
                             </tr>
                             <tr>
                                 <th>Date</th>

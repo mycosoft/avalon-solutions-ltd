@@ -37,7 +37,7 @@
                                         <select class="form-control @error('patient_id') is-invalid @enderror" id="patient_id" name="patient_id" required>
                                             <option value="">Select Patient</option>
                                             @foreach($patients as $pt)
-                                                <option value="{{ $pt->id }}" {{ old('patient_id', $patient?->id) == $pt->id ? 'selected' : '' }}>{{ $pt->name }} - {{ number_format($pt->amount_to_pay, 2) }}/day</option>
+                                                <option value="{{ $pt->id }}" {{ old('patient_id', $patient?->id) == $pt->id ? 'selected' : '' }}>{{ $pt->name }} - {{ number_format($pt->amount_to_pay, 0) }}</option>
                                             @endforeach
                                         </select>
                                         @error('patient_id')
@@ -137,7 +137,7 @@
                             </tr>
                             <tr>
                                 <th>Daily Rate</th>
-                                <td>{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($patient->amount_to_pay, 2) }}</td>
+                                <td>{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($patient->amount_to_pay, 0) }}</td>
                             </tr>
                             <tr>
                                 <th>Admission Date</th>
@@ -149,15 +149,15 @@
                             </tr>
                             <tr class="bg-light">
                                 <th>Total Due</th>
-                                <td class="font-weight-bold">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($totalDue, 2) }}</td>
+                                <td class="font-weight-bold">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($totalDue, 0) }}</td>
                             </tr>
                             <tr>
                                 <th>Total Paid</th>
-                                <td class="text-success">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($paidAmount, 2) }}</td>
+                                <td class="text-success">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($paidAmount, 0) }}</td>
                             </tr>
                             <tr class="bg-warning">
                                 <th>Balance Due</th>
-                                <td class="font-weight-bold text-danger">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($balance, 2) }}</td>
+                                <td class="font-weight-bold text-danger">{{ \App\Models\Setting::get('currency_symbol', 'UGX') }} {{ number_format($balance, 0) }}</td>
                             </tr>
                         </table>
                     </div>

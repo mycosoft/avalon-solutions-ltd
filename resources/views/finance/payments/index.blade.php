@@ -92,7 +92,7 @@
                                             @endif
                                         </td>
                                         <td>{{ $pmt->payee_name }}</td>
-                                        <td>{{ number_format($pmt->amount_paid, 2) }}</td>
+                                        <td>{{ number_format($pmt->amount_paid, 0) }}</td>
                                         <td>{{ $pmt->days_paid }}</td>
                                         <td>{{ ucfirst($pmt->payment_method) }}</td>
                                         <td>
@@ -102,7 +102,7 @@
                                                 <span class="badge badge-success">Full</span>
                                             @endif
                                         </td>
-                                        <td>{{ number_format($pmt->balance, 2) }}</td>
+                                        <td>{{ number_format($pmt->balance, 0) }}</td>
                                         <td>
                                             <a href="{{ route('payments.show', $pmt->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
                                             <a href="{{ route('payments.receipt', $pmt->id) }}" class="btn btn-default btn-sm" target="_blank" title="Print Receipt">

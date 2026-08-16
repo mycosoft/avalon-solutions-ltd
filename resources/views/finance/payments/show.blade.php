@@ -73,7 +73,7 @@
                         <table class="table table-striped">
                             <tr>
                                 <th width="150">Daily Rate</th>
-                                <td>{{ number_format($payment->daily_rate, 2) }}</td>
+                                <td>{{ number_format($payment->daily_rate, 0) }}</td>
                             </tr>
                             <tr>
                                 <th>Days Paid</th>
@@ -89,13 +89,13 @@
                             </tr>
                             <tr>
                                 <th>Amount Paid</th>
-                                <td class="text-success font-weight-bold">{{ number_format($payment->amount_paid, 2) }}</td>
+                                <td class="text-success font-weight-bold">{{ number_format($payment->amount_paid, 0) }}</td>
                             </tr>
                             <tr>
                                 <th>Remaining Balance</th>
                                 <td class="text-danger font-weight-bold">
                                     @if((float) $payment->running_balance > 0)
-                                        {{ number_format($payment->running_balance, 2) }}
+                                        {{ number_format($payment->running_balance, 0) }}
                                     @else
                                         <span class="badge badge-success">Cleared</span>
                                     @endif

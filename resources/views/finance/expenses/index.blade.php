@@ -80,7 +80,7 @@
                                         <td>{{ $expense->expense_date->format('Y-m-d') }}</td>
                                         <td>{{ $expense->description }}</td>
                                         <td><span class="badge badge-info">{{ $expense->category }}</span></td>
-                                        <td>{{ number_format($expense->amount, 2) }}</td>
+                                        <td>{{ number_format($expense->amount, 0) }}</td>
                                         <td>{{ $expense->recorded_by ?? 'N/A' }}</td>
                                         <td>
                                             <a href="{{ route('expenses.show', $expense->id) }}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>

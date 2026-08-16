@@ -206,16 +206,16 @@
         <table class="items">
             <tr>
                 <td class="desc">Salary for<br>{{ $payment->period_start->format('M d, Y') }} – {{ $payment->period_end->format('M d, Y') }}</td>
-                <td class="amt">{{ $currency }} {{ number_format($payment->amount_paid, 2) }}</td>
+                <td class="amt">{{ $currency }} {{ number_format($payment->amount_paid, 0) }}</td>
             </tr>
         </table>
         <div class="sep"></div>
-        <div class="row"><span>Monthly Rate</span><span>{{ $currency }} {{ number_format($payment->monthly_rate ?? 0, 2) }}</span></div>
+        <div class="row"><span>Monthly Rate</span><span>{{ $currency }} {{ number_format($payment->monthly_rate ?? 0, 0) }}</span></div>
     @else
         <table class="items">
             <tr>
                 <td class="desc">Daily Rate</td>
-                <td class="amt">{{ $currency }} {{ number_format($payment->daily_rate ?? 0, 2) }}</td>
+                <td class="amt">{{ $currency }} {{ number_format($payment->daily_rate ?? 0, 0) }}</td>
             </tr>
             <tr>
                 <td class="desc">Days Paid</td>
@@ -233,12 +233,12 @@
     <div class="totals">
         <div class="row grand">
             <span>TOTAL PAID</span>
-            <span>{{ $currency }} {{ number_format($payment->amount_paid, 2) }}</span>
+            <span>{{ $currency }} {{ number_format($payment->amount_paid, 0) }}</span>
         </div>
         @if(!$isCaregiver)
             <div class="row"><span>Method</span><span>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</span></div>
             <div class="row"><span>Type</span><span>{{ ucfirst($payment->payment_type) }}</span></div>
-            <div class="row"><span>Balance</span><span>{{ $currency }} {{ number_format($payment->balance, 2) }}</span></div>
+            <div class="row"><span>Balance</span><span>{{ $currency }} {{ number_format($payment->balance, 0) }}</span></div>
         @else
             <div class="row"><span>Method</span><span>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</span></div>
         @endif
