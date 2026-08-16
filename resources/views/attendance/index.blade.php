@@ -26,6 +26,9 @@
                     <div class="card-header">
                         <h3 class="card-title">Attendance Records</h3>
                         <div class="card-tools">
+                            <a href="{{ route('reports.show', 'attendance-general') }}" class="btn btn-avalon-white btn-sm">
+                                <i class="fas fa-clipboard-list"></i> Ward Round Report
+                            </a>
                             <a href="{{ route('attendance.create') }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-plus"></i> New Attendance
                             </a>

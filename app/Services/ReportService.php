@@ -22,6 +22,7 @@ class ReportService
             'outstanding'    => 'Outstanding Balances',
             'caregivers'     => 'Caregivers Report',
             'attendance'     => 'Attendance Report',
+            'attendance-general' => 'General Attendance (Ward Round)',
         ];
     }
 
@@ -34,7 +35,8 @@ class ReportService
             'patients' => $this->patients($request),
             'outstanding' => $this->outstanding($request),
             'caregivers' => $this->caregivers($request),
-            'attendance' => $this->attendance($request),
+            'attendance'         => $this->attendance($request),
+            'attendance-general' => $this->attendanceGeneral($request),
             default => abort(404),
         };
     }
@@ -586,6 +588,165 @@ class ReportService
         return $report;
     }
 
+    /**
+     * General Attendance (Ward Round) report.
+     *
+     * Shows every active patient currently on ward, grouped by ward, with
+     * their assigned caregivers and visit status for the selected date.
+     * Designed for the admin's daily ward-round workflow — they can quickly
+     * see which patients still need to be visited today, and which patients
+     * have reported complaints.
+     */
+    private function attendanceGeneral(Request $request): array
+    {
+        $date = $request->date ?? now()->format('Y-m-d');
+        $dateLabel = Carbon::parse($date)->format('D, d M Y');
+
+        // Eager-load every active, on-ward patient with their active caregivers.
+        $patients = Patient::with(['caregivers' => function ($q) {
+                $q->orderBy('name');
+            }])
+            ->where('is_active', true)
+            ->where('patient_status', 'on_ward')
+            ->orderBy('ward')
+            ->orderBy('name')
+            ->get();
+
+        if ($request->ward) {
+            $patients = $patients->filter(
+                fn ($p) => strcasecmp((string) $p->ward, (string) $request->ward) === 0
+            )->values();
+        }
+
+        if ($request->caregiver_id) {
+            $patients = $patients->filter(
+                fn ($p) => $p->caregivers->pluck('id')->contains((int) $request->caregiver_id)
+            )->values();
+        }
+
+        // Visits recorded on the selected date (keyed by patient_id).
+        $todayVisits = Attendance::with('caregiver')
+            ->whereDate('date', $date)
+            ->get()
+            ->keyBy('patient_id');
+
+        // Ward-level roll-up for the headline summary.
+        $wards = [];
+        foreach ($patients as $pt) {
+            $wardKey = $pt->ward ?: '__unassigned__';
+            $wardName = $pt->ward ?: 'Unassigned Ward';
+            if (! isset($wards[$wardKey])) {
+                $wards[$wardKey] = [
+                    'name'       => $wardName,
+                    'patients'   => 0,
+                    'visited'    => 0,
+                    'pending'    => 0,
+                    'complaints' => 0,
+                ];
+            }
+            $wards[$wardKey]['patients']++;
+            $visit = $todayVisits->get($pt->id);
+            if ($visit) {
+                $wards[$wardKey]['visited']++;
+                if (filled($visit->complaint_reported)) {
+                    $wards[$wardKey]['complaints']++;
+                }
+            } else {
+                $wards[$wardKey]['pending']++;
+            }
+        }
+
+        $wardRows = [];
+        foreach ($wards as $w) {
+            $wardRows[] = [
+                $w['name'],
+                $w['patients'],
+                $w['visited'],
+                $w['pending'],
+                $w['complaints'],
+            ];
+        }
+        usort($wardRows, fn ($a, $b) => strcmp((string) $a[0], (string) $b[0]));
+
+        // Per-patient ward-round rows (full listing + pending subset).
+        $roundRows = [];
+        $pendingRows = [];
+        foreach ($patients as $pt) {
+            $caregiversList = $pt->caregivers->pluck('name')->implode(', ') ?: '— Unassigned —';
+            $daysUnderCare = $pt->days_admitted;
+            $visit = $todayVisits->get($pt->id);
+
+            $status    = $visit ? 'Visited' : 'Pending';
+            $complaint = $visit && filled($visit->complaint_reported) ? 'Yes' : 'None';
+            $followUp  = $visit && filled($visit->follow_up) ? 'Yes' : 'None';
+
+            $row = [
+                $pt->ward ?: '—',
+                $pt->name,
+                $caregiversList,
+                $daysUnderCare,
+                $status,
+                $complaint,
+                $followUp,
+            ];
+
+            $roundRows[] = $row;
+            if (! $visit) {
+                $pendingRows[] = $row;
+            }
+        }
+
+        $filters = [
+            ['label' => 'Round Date', 'value' => $dateLabel],
+        ];
+        if ($request->ward) {
+            $filters[] = ['label' => 'Ward', 'value' => $request->ward];
+        }
+        if ($request->caregiver_id) {
+            $filters[] = ['label' => 'Caregiver', 'value' => Caregiver::find($request->caregiver_id)?->name ?? 'N/A'];
+        }
+
+        $report = $this->baseReport(
+            'attendance-general',
+            'General Attendance — Ward Round',
+            "Daily ward-round overview for {$dateLabel}. Lists every on-ward patient with their assigned caregivers and visit status.",
+            $filters
+        );
+
+        $totalVisited = $patients->filter(fn ($pt) => $todayVisits->has($pt->id))->count();
+        $totalComplaints = $todayVisits->filter(fn ($v) => filled($v->complaint_reported))->count();
+
+        $report['totals'] = [
+            ['label' => 'Patients on Ward', 'value' => $patients->count(), 'class' => 'primary'],
+            ['label' => 'Visited Today',    'value' => $totalVisited,      'class' => 'success'],
+            ['label' => 'Pending Visits',   'value' => max(0, $patients->count() - $totalVisited), 'class' => 'warning'],
+            ['label' => 'Complaints Today', 'value' => $totalComplaints,    'class' => 'danger'],
+        ];
+
+        $report['sections'][] = [
+            'title'   => 'Ward Roll-up',
+            'headers' => ['Ward', 'Patients', 'Visited', 'Pending', 'Complaints'],
+            'rows'    => $wardRows,
+            'empty'   => empty($wardRows) ? 'No active on-ward patients match the selected filters.' : null,
+        ];
+
+        $report['sections'][] = [
+            'title'   => 'Patients Not Yet Visited Today',
+            'headers' => ['Ward', 'Patient', 'Caregiver(s)', 'Days Under Care', 'Status', 'Complaint', 'Follow Up'],
+            'rows'    => $pendingRows,
+            'empty'   => empty($pendingRows) ? 'All on-ward patients have been visited today.' : null,
+        ];
+
+        $report['sections'][] = [
+            'title'   => 'Full Ward Round — ' . $dateLabel,
+            'headers' => ['Ward', 'Patient', 'Caregiver(s)', 'Days Under Care', 'Status', 'Complaint', 'Follow Up'],
+            'rows'    => $roundRows,
+            'empty'   => empty($roundRows) ? 'No on-ward patients match the selected filters.' : null,
+        ];
+
+        return $report;
+    }
+
     public function filterForm(string $type, Request $request): array
     {
         $patients = Patient::orderBy('name')->get(['id', 'name']);
@@ -628,6 +789,11 @@ class ReportService
                 $this->field($request, 'date', 'date_to', 'To'),
                 $this->selectField($request, 'caregiver_id', 'Caregiver', $caregivers->pluck('name', 'id')->all(), 'All Caregivers'),
                 $this->selectField($request, 'patient_id', 'Patient', $patients->pluck('name', 'id')->all(), 'All Patients'),
+            ],
+            'attendance-general' => [
+                $this->field($request, 'date', 'date', 'Round Date'),
+                $this->field($request, 'text', 'ward', 'Ward'),
+                $this->selectField($request, 'caregiver_id', 'Caregiver', $caregivers->pluck('name', 'id')->all(), 'All Caregivers'),
             ],
         ];
 

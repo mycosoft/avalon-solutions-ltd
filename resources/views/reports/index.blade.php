@@ -37,7 +37,8 @@
                                         'patients'    => ['icon' => 'fa-procedures',           'desc' => 'Patient registry with daily rate, total paid and outstanding balance.',  'color' => 'primary'],
                                         'outstanding' => ['icon' => 'fa-exclamation-circle',   'desc' => 'Patients with unpaid balances, sorted from highest to lowest.',         'color' => 'danger'],
                                         'caregivers'  => ['icon' => 'fa-user-nurse',           'desc' => 'Caregiver registry with assigned patients and monthly rate.',           'color' => 'warning'],
-                                        'attendance'  => ['icon' => 'fa-calendar-check',       'desc' => 'Daily attendance, checkup and complaint records for caregivers.',     'color' => 'secondary'],
+                                        'attendance'         => ['icon' => 'fa-calendar-check',       'desc' => 'Daily attendance, checkup and complaint records for caregivers.',     'color' => 'secondary'],
+                                        'attendance-general' => ['icon' => 'fa-clipboard-list',      'desc' => 'Daily ward-round view of every on-ward patient with their caregivers, visit status and complaints.', 'color' => 'info'],
                                     ];
                                     $meta = $reportMeta[$key] ?? ['icon' => 'fa-file-alt', 'desc' => '', 'color' => 'info'];
                                 @endphp
