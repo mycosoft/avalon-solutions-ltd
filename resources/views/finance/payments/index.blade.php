@@ -1,17 +1,17 @@
 @extends('adminlte::page')
 
-@section('title', 'Payments')
+@section('title', 'Patient Payments')
 
 @section('content_header')
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Payments</h1>
+                <h1 class="m-0">Patient Payments</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Payments</li>
+                    <li class="breadcrumb-item active">Patient Payments</li>
                 </ol>
             </div>
         </div>
@@ -24,8 +24,11 @@
             <div class="col-12">
                 <div class="card card-info">
                     <div class="card-header">
-                        <h3 class="card-title">Payment Records</h3>
+                        <h3 class="card-title">Patient Payment Records</h3>
                         <div class="card-tools">
+                            <a href="{{ route('caregiver-payments.index') }}" class="btn btn-default btn-sm mr-2">
+                                <i class="fas fa-user-nurse"></i> Caregiver Payments
+                            </a>
                             <a href="{{ route('payments.create') }}" class="btn btn-success btn-sm">
                                 <i class="fas fa-plus"></i> Record Payment
                             </a>
@@ -88,14 +91,7 @@
                                                 <span class="text-muted">—</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            {{ $pmt->payee_name }}
-                                            @if($pmt->payee_for === 'caregiver')
-                                                <span class="badge badge-info ml-1">Caregiver</span>
-                                            @else
-                                                <span class="badge badge-secondary ml-1">Patient</span>
-                                            @endif
-                                        </td>
+                                        <td>{{ $pmt->payee_name }}</td>
                                         <td>{{ number_format($pmt->amount_paid, 2) }}</td>
                                         <td>{{ $pmt->days_paid }}</td>
                                         <td>{{ ucfirst($pmt->payment_method) }}</td>
