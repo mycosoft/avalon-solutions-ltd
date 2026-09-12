@@ -38,6 +38,7 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::get('/caregivers', [CaregiverController::class, 'index'])->name('caregivers.index');
         Route::get('/caregivers/create', [CaregiverController::class, 'create'])->name('caregivers.create');
         Route::post('/caregivers', [CaregiverController::class, 'store'])->name('caregivers.store');
+        Route::get('/caregivers/search', [CaregiverController::class, 'search'])->name('caregivers.search');
         Route::get('/caregivers/{caregiver}', [CaregiverController::class, 'show'])->name('caregivers.show');
         Route::get('/caregivers/{caregiver}/edit', [CaregiverController::class, 'edit'])->name('caregivers.edit');
         Route::put('/caregivers/{caregiver}', [CaregiverController::class, 'update'])->name('caregivers.update');
@@ -46,6 +47,8 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
         Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
         Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+        Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
+        Route::get('/patients/search-detailed', [PatientController::class, 'searchDetailed'])->name('patients.search-detailed');
         Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
@@ -76,6 +79,7 @@ Route::middleware(['auth', 'checkUserStatus'])->group(function () {
         Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
         Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+        Route::get('/payments/{payment}/download', [PaymentController::class, 'download'])->name('payments.download');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
         Route::get('/payments/patient-balance/{patientId}', [PaymentController::class, 'getPatientBalance'])->name('payments.patient-balance');
 

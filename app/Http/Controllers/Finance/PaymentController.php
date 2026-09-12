@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Patient;
 use App\Models\UserNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,15 @@ class PaymentController extends Controller
     {
         $payments = Payment::with('patient')
             ->forPatients()
+            ->when($request->search, function ($query) use ($request) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('patient', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhere('payee_name', 'like', "%{$search}%");
+                });
+            })
             ->when($request->patient_id, function ($query) use ($request) {
                 $query->where('patient_id', $request->patient_id);
             })
@@ -31,7 +41,7 @@ class PaymentController extends Controller
                 $query->whereDate('payment_date', '<=', $request->date_to);
             })
             ->orderBy('payment_date', 'desc')
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
 
         $patients = Patient::where('is_active', true)->get();
 
@@ -67,6 +77,8 @@ class PaymentController extends Controller
             'payee_name' => 'required|string|max:255',
             'amount_paid' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
+            'period_start' => 'required|date|before_or_equal:period_end',
+            'period_end' => 'required|date|after_or_equal:period_start',
             'days_paid' => 'required|integer|min:1',
             'payment_method' => 'required|in:cash,bank,mobile_money,other',
             'notes' => 'nullable|string',
@@ -78,8 +90,8 @@ class PaymentController extends Controller
 
         $patient = Patient::find($request->patient_id);
         $dailyRate = $patient->amount_to_pay;
-        $periodStart = $request->payment_date;
-        $periodEnd = now()->addDays($request->days_paid - 1)->format('Y-m-d');
+        $periodStart = $request->period_start;
+        $periodEnd = $request->period_end;
 
         // Compute the new running balance as:
         //   (current total due at this moment) - (cumulative payments up to & incl. this one)
@@ -122,13 +134,15 @@ class PaymentController extends Controller
             UserNotification::notifyAccountants(
                 'Partial Payment Received',
                 "A partial payment of {$request->amount_paid} was received from {$request->payee_name} for patient {$patient->name}. Balance: {$newBalance}",
-                'warning'
+                'warning',
+                route('payments.show', $payment->id)
             );
         } else {
             UserNotification::notifyAccountants(
                 'Payment Received',
                 "A payment of {$request->amount_paid} was received from {$request->payee_name} for patient {$patient->name}.",
-                'success'
+                'success',
+                route('payments.show', $payment->id)
             );
         }
 
@@ -151,6 +165,22 @@ class PaymentController extends Controller
             'payment'   => $payment,
             'payeeType' => 'patient',
         ]);
+    }
+
+    public function download(Payment $payment)
+    {
+        $payment->load('patient');
+
+        // 58mm x 150mm receipt paper (58mm = 164.41pt, 150mm = 425.2pt)
+        $pdf = Pdf::loadView('finance.payments.receipt', [
+            'payment'   => $payment,
+            'payeeType' => 'patient',
+            'pdfMode'   => true,
+        ])->setPaper([0, 0, 164.41, 425.2], 'portrait');
+
+        $pdf->getDomPDF()->getOptions()->setIsFontSubsettingEnabled(true);
+
+        return $pdf->download('receipt-' . $payment->receipt_number . '.pdf');
     }
 
     public function getPatientBalance($patientId)

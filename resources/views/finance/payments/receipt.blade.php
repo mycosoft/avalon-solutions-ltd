@@ -19,15 +19,15 @@
     <title>Receipt {{ $payment->receipt_number }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* Thermal printer: 80mm roll */
+        /* Mobile Bluetooth printer: 58mm roll */
         @page {
-            size: 80mm auto;
+            size: 58mm auto;
             margin: 0;
         }
         * { box-sizing: border-box; }
         body {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 400;
             line-height: 1.4;
             color: #000;
             background: #f1f3f5;
@@ -35,10 +35,10 @@
             padding: 18px;
         }
         .receipt {
-            width: 72mm;
+            width: 54mm;
             margin: 0 auto;
             background: #fff;
-            padding: 6mm 5mm;
+            padding: 3mm 1mm;
             border: 1px solid #d0d4d9;
             border-radius: 2px;
         }
@@ -60,35 +60,44 @@
         .header h1 {
             font-size: 16px;
             margin: 0 0 2px;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: 0.5px;
         }
         .header .tagline {
-            font-size: 10px;
+            font-size: 11px;
             font-style: italic;
             margin-bottom: 4px;
         }
         .header .meta {
-            font-size: 10px;
+            font-size: 11px;
             line-height: 1.5;
         }
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             margin: 0 auto 6px;
             display: block;
-            object-fit: contain;
+            object-fit: cover;
+            border-radius: 50%;
         }
         .row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
+            display: table;
+            width: 100%;
+            font-size: 12px;
         }
-        .label { font-weight: 700; }
+        .row > span:first-child {
+            display: table-cell;
+            text-align: left;
+        }
+        .row > span:last-child {
+            display: table-cell;
+            text-align: right;
+        }
+        .label { font-weight: 400; }
         .receipt-title {
             text-align: center;
-            font-weight: 900;
-            font-size: 13px;
+            font-weight: 700;
+            font-size: 15px;
             margin: 4px 0;
             letter-spacing: 1px;
             border-top: 1px solid #000;
@@ -98,7 +107,7 @@
         table.items {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
+            font-size: 12px;
         }
         table.items td {
             padding: 2px 0;
@@ -106,31 +115,46 @@
         }
         table.items td.desc { width: 65%; }
         table.items td.amt  { width: 35%; text-align: right; }
+        .period-row {
+            padding: 2px 0;
+        }
+        .period-label {
+            font-weight: 700;
+            margin-bottom: 1px;
+        }
+        .period-value {
+            font-weight: 400;
+            white-space: nowrap;
+            display: inline-block;
+        }
         .totals .row {
-            font-size: 12px;
+            font-size: 13px;
             padding: 2px 0;
         }
         .totals .grand {
-            font-size: 14px;
-            font-weight: 900;
+            font-size: 16px;
+            font-weight: 400;
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
             padding: 4px 0;
             margin: 4px 0;
         }
+        .totals .grand .amount {
+            font-weight: 700;
+        }
         .footer-note {
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
             margin-top: 8px;
             line-height: 1.5;
         }
         .footer-note .thanks {
-            font-weight: 700;
-            font-size: 12px;
+            font-weight: 400;
+            font-size: 13px;
             margin-bottom: 4px;
         }
         .actions {
-            width: 72mm;
+            width: 54mm;
             margin: 14px auto 0;
             text-align: center;
         }
@@ -155,20 +179,51 @@
 
         /* Hide action buttons when printing */
         @media print {
-            body { background: #fff; padding: 0; }
-            .receipt { border: none; padding: 4mm; width: auto; }
+            body {
+                background: #fff;
+                padding: 0;
+                font-size: 15px;
+                font-weight: 400;
+                line-height: 1.3;
+            }
+            .receipt {
+                border: none;
+                padding: 3mm 1mm;
+                width: 54mm;
+            }
             .actions { display: none !important; }
+            .header h1 { font-size: 19px; }
+            .header .tagline, .header .meta { font-size: 12px; }
+            .row { font-size: 13px; }
+            table.items { font-size: 13px; }
+            .receipt-title { font-size: 16px; }
+            .totals .row { font-size: 14px; }
+            .totals .grand { font-size: 17px; }
+            .footer-note { font-size: 13px; }
+            .footer-note .thanks { font-size: 14px; }
         }
+
+        /* PDF (dompdf) mode */
+        body.pdf {
+            background: #fff;
+            padding: 0;
+        }
+        body.pdf .receipt {
+            border: none;
+            width: auto;
+            margin: 0;
+        }
+        body.pdf .actions { display: none; }
     </style>
 </head>
-<body>
+<body class="{{ ($pdfMode ?? false) ? 'pdf' : '' }}">
 
 <div class="receipt">
 
     {{-- Header --}}
     <div class="header">
         @if($showLogo)
-            <img class="logo" src="{{ asset('images/logo.png') }}" alt="{{ $companyName }}" onerror="this.style.display='none'">
+            <img class="logo" src="{{ ($pdfMode ?? false) ? public_path('images/avalon.jpeg') : asset('images/avalon.jpeg') }}" alt="{{ $companyName }}" onerror="this.style.display='none'">
         @endif
         <h1>{{ strtoupper($companyName) }}</h1>
         @if($companyTagline)<div class="tagline">{{ $companyTagline }}</div>@endif
@@ -222,8 +277,10 @@
                 <td class="amt">{{ $payment->days_paid }}</td>
             </tr>
             <tr>
-                <td class="desc">Period<br><small>{{ $payment->period_start->format('Y-m-d') }} → {{ $payment->period_end->format('Y-m-d') }}</small></td>
-                <td class="amt"></td>
+                <td colspan="2" class="period-row">
+                    <div class="period-label">Period:</div>
+                    <div class="period-value">{{ $payment->period_start->format('Y-m-d') }} → {{ $payment->period_end->format('Y-m-d') }}</div>
+                </td>
             </tr>
         </table>
         <div class="sep"></div>
@@ -233,7 +290,7 @@
     <div class="totals">
         <div class="row grand">
             <span>TOTAL PAID</span>
-            <span>{{ $currency }} {{ number_format($payment->amount_paid, 0) }}</span>
+            <span class="amount">{{ $currency }} {{ number_format($payment->amount_paid, 0) }}</span>
         </div>
         @if(!$isCaregiver)
             <div class="row"><span>Method</span><span>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</span></div>
@@ -246,7 +303,7 @@
 
     @if($payment->notes)
         <div class="sep"></div>
-        <div style="font-size: 10px;"><strong>Notes:</strong> {{ $payment->notes }}</div>
+        <div style="font-size: 11px;">Notes: {{ $payment->notes }}</div>
     @endif
 
     <div class="sep-thick"></div>
@@ -260,9 +317,90 @@
 
 <div class="actions">
     <button onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+    <button onclick="downloadReceiptImage(this)"><i class="fas fa-download"></i> Download</button>
     <a href="{{ $isCaregiver ? route('caregiver-payments.index') : route('payments.index') }}"><i class="fas fa-arrow-left"></i> Back</a>
     <button class="close-btn" onclick="window.close()"><i class="fas fa-times"></i> Close</button>
 </div>
+
+<script src="{{ asset('js/html2canvas.min.js') }}?v=2"></script>
+<script>
+    var receiptImageDataUrl = null;
+    var captureInProgress = false;
+
+    function captureReceipt(callback, onError) {
+        if (typeof html2canvas === 'undefined') {
+            if (onError) onError('missing');
+            return;
+        }
+        if (captureInProgress) {
+            if (onError) onError('busy');
+            return;
+        }
+        captureInProgress = true;
+
+        var receipt = document.querySelector('.receipt');
+
+        // Hide the preview border so the image is the clean receipt
+        var oldBorder = receipt.style.border;
+        var oldRadius = receipt.style.borderRadius;
+        receipt.style.border = 'none';
+        receipt.style.borderRadius = '0';
+
+        html2canvas(receipt, {
+            scale: 3,
+            backgroundColor: '#ffffff',
+            useCORS: true
+        }).then(function (canvas) {
+            receipt.style.border = oldBorder;
+            receipt.style.borderRadius = oldRadius;
+            captureInProgress = false;
+
+            // Pad the capture to 58mm-equivalent width (receipt is 54mm) so
+            // apps that stretch the image to paper width keep the true size.
+            var padded = document.createElement('canvas');
+            padded.width = Math.round(canvas.width * 58 / 54);
+            padded.height = canvas.height;
+            var ctx = padded.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, padded.width, padded.height);
+            ctx.drawImage(canvas, Math.round((padded.width - canvas.width) / 2), 0);
+
+            receiptImageDataUrl = padded.toDataURL('image/png');
+            callback(receiptImageDataUrl);
+        }).catch(function (error) {
+            receipt.style.border = oldBorder;
+            receipt.style.borderRadius = oldRadius;
+            captureInProgress = false;
+            if (onError) onError(error);
+        });
+    }
+
+    function downloadReceiptImage(btn) {
+        var oldLabel = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Preparing...';
+
+        var doDownload = function (dataUrl) {
+            var link = document.createElement('a');
+            link.download = 'receipt-{{ $payment->receipt_number }}.png';
+            link.href = dataUrl;
+            link.click();
+
+            btn.disabled = false;
+            btn.innerHTML = oldLabel;
+        };
+
+        if (receiptImageDataUrl) {
+            doDownload(receiptImageDataUrl);
+        } else {
+            captureReceipt(doDownload, function () {
+                btn.disabled = false;
+                btn.innerHTML = oldLabel;
+                alert('Image library failed to load. Please update the server files (public/js/html2canvas.min.js is missing).');
+            });
+        }
+    }
+</script>
 
 </body>
 </html>
