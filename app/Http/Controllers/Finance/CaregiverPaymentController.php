@@ -20,8 +20,10 @@ class CaregiverPaymentController extends Controller
 
     /**
      * Unpaid attendance days that count toward a caregiver's arrears.
-     * Excludes inactive caregivers, days the caregiver was absent,
-     * and days the patient was absent.
+     * Excludes days the caregiver was absent and days the patient was absent.
+     * Note: the caregiver's status is deliberately NOT filtered here —
+     * discharge/transfer of their patient flips them to status=false
+     * ("pending"), but days already worked must remain payable.
      */
     private function unpaidAttendances(int $caregiverId)
     {
@@ -29,7 +31,6 @@ class CaregiverPaymentController extends Controller
             ->where('caregiver_present', true)
             ->where('is_paid', false)
             ->where('status', true)
-            ->whereHas('caregiver', fn ($q) => $q->where('status', true))
             ->orderBy('date');
     }
 
