@@ -154,7 +154,7 @@ class PaymentController extends Controller
 
     public function show(Payment $payment)
     {
-        $payment->load('patient');
+        $payment->load(['patient', 'caregiver']);
         return view('finance.payments.show', compact('payment'));
     }
 

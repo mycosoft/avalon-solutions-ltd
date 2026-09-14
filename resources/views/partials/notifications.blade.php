@@ -69,7 +69,7 @@ function fetchNotifications() {
                 var timeAgo = notif.created_at ? timeSince(notif.created_at) : 'just now';
                 html += `
                     <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item notification-item" data-id="${notif.id}" onclick="markAsRead(${notif.id}, this, event)">
+                    <a href="${notif.url || '#'}" class="dropdown-item notification-item" data-id="${notif.id}" data-url="${notif.url || ''}" onclick="markAsRead(${notif.id}, this, event)">
                         <div class="media">
                             <div class="media-body">
                                 <h3 class="dropdown-item-title" style="font-size: 0.95rem;">
@@ -92,7 +92,7 @@ function fetchNotifications() {
 }
 
 function markAsRead(id, element, event) {
-    event.preventDefault();
+    var url = element.getAttribute('data-url');
 
     fetch('/notifications/' + id + '/read', {
         method: 'POST',
@@ -107,6 +107,9 @@ function markAsRead(id, element, event) {
     .then(data => {
         if (data.success) {
             fetchNotifications();
+            if (url) {
+                window.location.href = url;
+            }
         }
     })
     .catch(error => console.log('Mark as read error:', error));

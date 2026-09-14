@@ -12,6 +12,8 @@ class Attendance extends Model
 
     protected $fillable = [
         'caregiver_id',
+        'caregiver_present',
+        'is_paid',
         'patient_id',
         'date',
         'ward',
@@ -26,6 +28,8 @@ class Attendance extends Model
     protected $casts = [
         'date' => 'date',
         'status' => 'boolean',
+        'caregiver_present' => 'boolean',
+        'is_paid' => 'boolean',
     ];
 
     public function caregiver(): BelongsTo

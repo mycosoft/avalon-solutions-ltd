@@ -34,8 +34,8 @@
                                 <td><code>{{ $payment->receipt_number }}</code></td>
                             </tr>
                             <tr>
-                                <th>Patient</th>
-                                <td>{{ $payment->patient->name }}</td>
+                                <th>{{ $payment->patient ? 'Patient' : 'Caregiver' }}</th>
+                                <td>{{ $payment->patient?->name ?? $payment->caregiver?->name ?? 'N/A' }}</td>
                             </tr>
                             <tr>
                                 <th>Payee Name</th>
@@ -81,11 +81,11 @@
                             </tr>
                             <tr>
                                 <th>Period Start</th>
-                                <td>{{ $payment->period_start->format('Y-m-d') }}</td>
+                                <td>{{ $payment->period_start?->format('Y-m-d') ?? '—' }}</td>
                             </tr>
                             <tr>
                                 <th>Period End</th>
-                                <td>{{ $payment->period_end->format('Y-m-d') }}</td>
+                                <td>{{ $payment->period_end?->format('Y-m-d') ?? '—' }}</td>
                             </tr>
                             <tr>
                                 <th>Amount Paid</th>

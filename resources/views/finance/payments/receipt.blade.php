@@ -260,7 +260,11 @@
     @if($isCaregiver)
         <table class="items">
             <tr>
-                <td class="desc">Salary for<br>{{ $payment->period_start->format('M d, Y') }} – {{ $payment->period_end->format('M d, Y') }}</td>
+                <td class="desc">Salary for
+                    @if($payment->period_start && $payment->period_end)
+                    <br>{{ $payment->period_start->format('M d, Y') }} - {{ $payment->period_end->format('M d, Y') }}
+                    @endif
+                </td>
                 <td class="amt">{{ $currency }} {{ number_format($payment->amount_paid, 0) }}</td>
             </tr>
         </table>
@@ -279,7 +283,7 @@
             <tr>
                 <td colspan="2" class="period-row">
                     <div class="period-label">Period:</div>
-                    <div class="period-value">{{ $payment->period_start->format('Y-m-d') }} → {{ $payment->period_end->format('Y-m-d') }}</div>
+                    <div class="period-value">@if($payment->period_start && $payment->period_end){{ $payment->period_start->format('Y-m-d') }} - {{ $payment->period_end->format('Y-m-d') }}@endif</div>
                 </td>
             </tr>
         </table>
@@ -310,7 +314,7 @@
     <div class="footer-note">
         <div class="thanks">{{ $receiptFooter }}</div>
         <div>Recorded by: {{ $payment->recorded_by ?? auth()->user()->name ?? 'System' }}</div>
-        <div style="margin-top: 4px;">— {{ strtoupper($companyName) }} —</div>
+        <div style="margin-top: 4px;">- {{ strtoupper($companyName) }} -</div>
     </div>
 
 </div>

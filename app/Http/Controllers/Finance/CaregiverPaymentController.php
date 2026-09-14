@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Caregiver;
 use App\Models\Payment;
 use App\Models\UserNotification;
@@ -15,6 +16,21 @@ class CaregiverPaymentController extends Controller
     public function __construct()
     {
         $this->middleware('role:superadmin|admin|accountant');
+    }
+
+    /**
+     * Unpaid attendance days that count toward a caregiver's arrears.
+     * Excludes inactive caregivers, days the caregiver was absent,
+     * and days the patient was absent.
+     */
+    private function unpaidAttendances(int $caregiverId)
+    {
+        return Attendance::where('caregiver_id', $caregiverId)
+            ->where('caregiver_present', true)
+            ->where('is_paid', false)
+            ->where('status', true)
+            ->whereHas('caregiver', fn ($q) => $q->where('status', true))
+            ->orderBy('date');
     }
 
     public function index(Request $request)
@@ -31,7 +47,7 @@ class CaregiverPaymentController extends Controller
                 $q->whereDate('payment_date', '<=', $request->date_to);
             })
             ->orderBy('payment_date', 'desc')
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
 
         $caregivers = Caregiver::orderBy('name')->get();
 
@@ -54,8 +70,6 @@ class CaregiverPaymentController extends Controller
             'caregiver_id'    => 'required|exists:caregivers,id',
             'amount_paid'     => 'required|numeric|min:0',
             'payment_date'    => 'required|date',
-            'period_start'    => 'required|date',
-            'period_end'      => 'required|date|after_or_equal:period_start',
             'payment_method'  => 'required|in:cash,bank,mobile_money,other',
             'notes'           => 'nullable|string',
         ]);
@@ -66,29 +80,57 @@ class CaregiverPaymentController extends Controller
 
         $caregiver = Caregiver::find($request->caregiver_id);
 
+        // Get unpaid attendance records for this caregiver
+        $unpaidAttendances = $this->unpaidAttendances($request->caregiver_id)->get();
+
+        $unpaidDays = $unpaidAttendances->count();
+        $totalBalance = $unpaidDays * $caregiver->daily_rate;
+
+        // Determine payment type and balance remaining
+        $paymentType = 'partial';
+        $balanceRemaining = $totalBalance - $request->amount_paid;
+
+        if ($request->amount_paid >= $totalBalance) {
+            $paymentType = 'full';
+            $balanceRemaining = 0;
+        }
+
+        // Period covered by the paid attendances (falls back to the payment date)
+        $periodStart = $unpaidAttendances->min('date') ?? $request->payment_date;
+        $periodEnd   = $unpaidAttendances->max('date') ?? $request->payment_date;
+
         $payment = Payment::create([
             'patient_id'     => null,
             'payee_for'      => 'caregiver',
             'caregiver_id'   => $request->caregiver_id,
             'payee_name'     => $caregiver->name,
             'amount_paid'    => $request->amount_paid,
-            'daily_rate'     => 0,
+            'daily_rate'     => $caregiver->daily_rate,
             'monthly_rate'   => $caregiver->monthly_rate,
-            'days_paid'      => 1,
+            'days_paid'      => $unpaidDays,
             'payment_date'   => $request->payment_date,
-            'period_start'   => $request->period_start,
-            'period_end'     => $request->period_end,
+            'period_start'   => $periodStart,
+            'period_end'     => $periodEnd,
             'payment_method' => $request->payment_method,
-            'payment_type'   => 'full',
-            'balance'        => 0,
+            'payment_type'   => $paymentType,
+            'balance'        => max(0, $balanceRemaining),
             'notes'          => $request->notes,
             'recorded_by'    => Auth::user()->name,
         ]);
 
+        // Mark attendance records as paid (up to the amount paid)
+        $amountRemaining = $request->amount_paid;
+        foreach ($unpaidAttendances as $attendance) {
+            if ($amountRemaining <= 0) break;
+            $attendance->update(['is_paid' => true]);
+            $amountRemaining -= $caregiver->daily_rate;
+        }
+
         UserNotification::notifyAccountants(
             'Caregiver Paid',
-            "A payment of {$request->amount_paid} was made to caregiver {$caregiver->name} for period {$request->period_start} to {$request->period_end}.",
-            'success'
+            "A payment of {$request->amount_paid} was made to caregiver {$caregiver->name}.",
+            'success',
+            route('payments.show', $payment->id)
         );
 
         return redirect()
@@ -116,18 +158,20 @@ class CaregiverPaymentController extends Controller
     {
         $caregiver = Caregiver::findOrFail($caregiverId);
 
-        // payment_plan = daily:  monthly_rate is per-day rate
-        // payment_plan = monthly: monthly_rate is per-month rate
-        $suggestedAmount = $caregiver->suggestedPayment(1);
+        // Get unpaid days count and balance
+        $unpaidDays = $this->unpaidAttendances($caregiverId)->count();
+
+        $totalBalance = $unpaidDays * $caregiver->daily_rate;
 
         return response()->json([
             'caregiver'        => $caregiver,
-            'name'             => $caregiver->name,
-            'payment_plan'     => $caregiver->payment_plan,
-            'rate'             => (float) $caregiver->monthly_rate,
-            'daily_rate'       => (float) $caregiver->daily_rate,
-            'suggested_amount' => $suggestedAmount,
-            'label'            => $caregiver->payment_plan === 'monthly' ? 'monthly' : 'per day',
+            'name'            => $caregiver->name,
+            'payment_plan'    => $caregiver->payment_plan,
+            'rate'            => (float) $caregiver->monthly_rate,
+            'daily_rate'      => (float) $caregiver->daily_rate,
+            'unpaid_days'     => $unpaidDays,
+            'total_balance'    => $totalBalance,
+            'label'           => $caregiver->payment_plan === 'monthly' ? 'monthly' : 'per day',
         ]);
     }
 }

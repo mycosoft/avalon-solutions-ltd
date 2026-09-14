@@ -35,9 +35,13 @@
                             <tr><th>Payment Date</th><td>{{ $payment->payment_date->format('Y-m-d') }}</td></tr>
                             <tr><th>Period</th>
                                 <td>
-                                    {{ $payment->period_start->format('Y-m-d') }}
-                                    &nbsp;to&nbsp;
-                                    {{ $payment->period_end->format('Y-m-d') }}
+                                    @if($payment->period_start && $payment->period_end)
+                                        {{ $payment->period_start->format('Y-m-d') }}
+                                        &nbsp;to&nbsp;
+                                        {{ $payment->period_end->format('Y-m-d') }}
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                             </tr>
                             <tr><th>Payment Method</th><td>{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</td></tr>

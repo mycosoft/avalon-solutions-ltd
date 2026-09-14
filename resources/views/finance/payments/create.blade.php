@@ -34,14 +34,9 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="patient_id">Patient *</label>
-                                        <select class="form-control @error('patient_id') is-invalid @enderror" id="patient_id" name="patient_id" required>
-                                            <option value="">Select Patient</option>
-                                            @foreach($patients as $pt)
-                                                <option value="{{ $pt->id }}" {{ old('patient_id', $patient?->id) == $pt->id ? 'selected' : '' }}>{{ $pt->name }} - {{ number_format($pt->amount_to_pay, 0) }}</option>
-                                            @endforeach
-                                        </select>
+                                        @include('partials.patient-assign')
                                         @error('patient_id')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
@@ -83,16 +78,34 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="period_start">Period Start *</label>
+                                        <input type="date" class="form-control @error('period_start') is-invalid @enderror" id="period_start" name="period_start" value="{{ old('period_start', now()->format('Y-m-d')) }}" required>
+                                        @error('period_start')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="period_end">Period End *</label>
+                                        <input type="date" class="form-control @error('period_end') is-invalid @enderror" id="period_end" name="period_end" value="{{ old('period_end', now()->format('Y-m-d')) }}" required>
+                                        @error('period_end')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="days_paid">Days Paid *</label>
-                                        <input type="number" class="form-control @error('days_paid') is-invalid @enderror" id="days_paid" name="days_paid" value="{{ old('days_paid', 1) }}" min="1" required>
+                                        <input type="number" class="form-control @error('days_paid') is-invalid @enderror" id="days_paid" name="days_paid" value="{{ old('days_paid', 1) }}" min="1" required readonly>
                                         @error('days_paid')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="amount_paid">Amount Paid *</label>
                                         <input type="number" step="0.01" class="form-control @error('amount_paid') is-invalid @enderror" id="amount_paid" name="amount_paid" value="{{ old('amount_paid') }}" required>
@@ -102,6 +115,9 @@
                                         @enderror
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Balance</label>
@@ -173,6 +189,19 @@
     var lastBalance = 0;
     var lastRate    = 0;
 
+    function calcDaysPaid() {
+        var start = $('#period_start').val();
+        var end   = $('#period_end').val();
+        if (!start || !end) return;
+        var startDate = new Date(start);
+        var endDate   = new Date(end);
+        if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) return;
+        var diffTime = endDate - startDate;
+        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        $('#days_paid').val(diffDays);
+        recalcAmount();
+    }
+
     function recalcAmount() {
         var days = parseInt($('#days_paid').val()) || 1;
         var suggested = (lastRate * days).toFixed(2);
@@ -181,8 +210,7 @@
         }
     }
 
-    $('#patient_id').change(function() {
-        var patientId = $(this).val();
+    function fetchPatientBalance(patientId) {
         if (!patientId) {
             $('#balance_display').val('0.00');
             lastRate = 0;
@@ -201,25 +229,47 @@
                 + lastBalance.toFixed(2) + '</strong>'
             );
 
-            // Auto-populate amount if empty (or recompute based on days_paid)
             $('#amount_paid').data('touched', false);
             recalcAmount();
         });
+    }
+
+    $(document).on('patientSelected', function (e, patientId) {
+        fetchPatientBalance(patientId);
     });
 
-    // Mark amount as touched when user manually edits it
+    $(document).on('patientDeselected', function (e, oldId) {
+        $('#balance_display').val('0.00');
+        lastRate = 0;
+        $('#amount_paid').data('touched', false).val('');
+        $('#rate_hint').text('Select a patient to auto-fill the amount.');
+    });
+
+    $(document).on('change', '#patient_id', function () {
+        fetchPatientBalance($(this).val());
+    });
+
     $('#amount_paid').on('input', function() {
         $(this).data('touched', true);
     });
 
-    // Recompute suggested amount when days change
-    $('#days_paid').on('input', function() {
-        recalcAmount();
+    $('#period_start, #period_end').on('change', function() {
+        calcDaysPaid();
     });
 
-    // Trigger initial fetch if patient is pre-selected (e.g. ?patient_id=)
     @if($patient)
-        $('#patient_id').trigger('change');
+        var preSelectedId = '{{ $patient->id }}';
+        $.get('/payments/patient-balance/' + preSelectedId, function(data) {
+            var $widget = $('.patient-assign-widget');
+            var $chip = $widget.find('.patient-chip');
+            var $hiddenInput = $widget.find('#patient_id');
+            $hiddenInput.val(preSelectedId);
+            $chip.find('.patient-chip-name').text('{{ $patient->name }}');
+            $chip.data('id', preSelectedId);
+            $chip.removeClass('d-none');
+            $widget.find('.patient-empty-hint').addClass('d-none');
+            fetchPatientBalance(preSelectedId);
+        });
     @endif
 </script>
 @stop

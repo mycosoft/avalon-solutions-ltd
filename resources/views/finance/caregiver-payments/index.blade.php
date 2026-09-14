@@ -67,8 +67,8 @@
                                     <th>ID</th>
                                     <th>Date</th>
                                     <th>Caregiver</th>
-                                    <th>Period</th>
-                                    <th>Monthly Rate</th>
+                                    <th>Days Paid</th>
+                                    <th>Daily Rate</th>
                                     <th>Amount</th>
                                     <th>Method</th>
                                     <th width="140">Actions</th>
@@ -80,13 +80,8 @@
                                         <td>{{ $pmt->id }}</td>
                                         <td>{{ $pmt->payment_date->format('Y-m-d') }}</td>
                                         <td>{{ $pmt->caregiver->name ?? 'N/A' }}</td>
-                                        <td>
-                                            <small>
-                                                {{ $pmt->period_start->format('M d') }} -
-                                                {{ $pmt->period_end->format('M d, Y') }}
-                                            </small>
-                                        </td>
-                                        <td>{{ number_format($pmt->monthly_rate ?? 0, 0) }}</td>
+                                        <td>{{ $pmt->days_paid }}</td>
+                                        <td>{{ number_format($pmt->daily_rate ?? 0, 0) }}</td>
                                         <td><strong>{{ number_format($pmt->amount_paid, 0) }}</strong></td>
                                         <td>{{ ucfirst(str_replace('_', ' ', $pmt->payment_method)) }}</td>
                                         <td>

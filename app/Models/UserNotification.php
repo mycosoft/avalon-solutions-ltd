@@ -12,6 +12,7 @@ class UserNotification extends Model
         'title',
         'message',
         'type',
+        'url',
         'read_at',
     ];
 
@@ -24,7 +25,7 @@ class UserNotification extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function notifyAdmins(string $title, string $message, string $type = 'info')
+    public static function notifyAdmins(string $title, string $message, string $type = 'info', ?string $url = null)
     {
         $admins = User::whereIn('role_type', ['superadmin', 'admin'])->get();
         foreach ($admins as $admin) {
@@ -33,21 +34,23 @@ class UserNotification extends Model
                 'title' => $title,
                 'message' => $message,
                 'type' => $type,
+                'url' => $url,
             ]);
         }
     }
 
-    public static function notifyUser(int $userId, string $title, string $message, string $type = 'info')
+    public static function notifyUser(int $userId, string $title, string $message, string $type = 'info', ?string $url = null)
     {
         self::create([
             'user_id' => $userId,
             'title' => $title,
             'message' => $message,
             'type' => $type,
+            'url' => $url,
         ]);
     }
 
-    public static function notifyAccountants(string $title, string $message, string $type = 'info')
+    public static function notifyAccountants(string $title, string $message, string $type = 'info', ?string $url = null)
     {
         $users = User::whereIn('role_type', ['superadmin', 'admin', 'accountant'])->get();
         foreach ($users as $user) {
@@ -56,6 +59,7 @@ class UserNotification extends Model
                 'title' => $title,
                 'message' => $message,
                 'type' => $type,
+                'url' => $url,
             ]);
         }
     }
